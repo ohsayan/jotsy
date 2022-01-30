@@ -14,37 +14,62 @@
  * limitations under the License.
 */
 
-const LOGIN_PAGE: &str = include_str!("../templates/login.html");
-
 use axum::{
     http::StatusCode,
     response::{Html, IntoResponse},
     routing::{get, get_service},
     Router,
 };
+use std::{
+    io::Error as IoError,
+    net::{IpAddr, Ipv4Addr, SocketAddr},
+};
+use tower_cookies::{CookieManagerLayer, Cookies};
+use tower_http::services::ServeDir;
 
-use tower_http::{services::ServeDir};
-
-use std::{io::Error as IoError, net::SocketAddr};
+const LOGIN_PAGE: &str = include_str!("../templates/login.html");
+const COOKIE_USERNAME: &str = "jotsy_user";
+const COOKIE_TOKEN: &str = "jotsy_token";
+const JOTSY_BIND_HOST: IpAddr = IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1));
+const JOTSY_BIND_PORT: u16 = 2022;
 
 #[tokio::main]
 async fn main() {
-    let router = Router::new().route("/", get(root)).nest(
-        "/static",
-        get_service(ServeDir::new("static/")).handle_error(|error: IoError| async move {
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                format!("Unhandled fs error: {}", error),
-            )
-        }),
-    );
-    let addr = SocketAddr::from(([127, 0, 0, 1], 2022));
+    // this is our host:port
+    let addr = SocketAddr::new(JOTSY_BIND_HOST, JOTSY_BIND_PORT);
+    // create the routes
+    let router = Router::new()
+        // this is our GET for /
+        .route("/", get(root))
+        // mount our static assets
+        .nest(
+            "/static",
+            get_service(ServeDir::new("static/")).handle_error(|error: IoError| async move {
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    format!("Unhandled fs error: {}", error),
+                )
+            }),
+        )
+        // add a cookie "layer" (axum's way of customizing routing)
+        .layer(CookieManagerLayer::new());
     axum::Server::bind(&addr)
         .serve(router.into_make_service())
         .await
         .unwrap();
 }
 
-async fn root() -> impl IntoResponse {
-    Html::from(LOGIN_PAGE)
+async fn root(cookies: Cookies) -> impl IntoResponse {
+    let username = cookies.get(COOKIE_USERNAME);
+    let token = cookies.get(COOKIE_TOKEN);
+    match (username, token) {
+        (Some(uname), Some(token)) => {
+            println!("Logged in. {uname} and {token}");
+            Html::from("<html>This is under construction</html>")
+        }
+        _ => {
+            println!("Not logged in");
+            Html::from(LOGIN_PAGE)
+        }
+    }
 }
