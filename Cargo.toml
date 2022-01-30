@@ -2,10 +2,9 @@
 name = "jotsy"
 version = "0.1.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+authors = ["Sayan Nandan <nandansayan@outlook.com>"]
 
 [dependencies]
-axum = "0.4.4"
-tokio = { version = "*", features = ["full"] }
-tower-http = { version = "0.2.1", features = ["full"] }
+axum = { version = "0.4.4", features = ["headers"] }
+tokio = { version = "1.16.1", features = ["macros", "rt-multi-thread"] }
+tower-http = { version = "0.2.1", features = ["fs"] }
