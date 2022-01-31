@@ -346,6 +346,7 @@ name = "jotsy"
 version = "0.1.0"
 dependencies = [
  "axum",
+ "skytable",
  "tokio",
  "tower-cookies",
  "tower-http",
@@ -661,6 +662,16 @@ name = "sha1_smol"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ae1a47186c03a32177042e55dbc5fd5aee900b8e0069a8d70fba96a9375cd012"
+
+[[package]]
+name = "skytable"
+version = "0.6.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a41cfc537b70528dc7435e290a0f82913fc06a9fdbb7db4adfa44a34a031073b"
+dependencies = [
+ "bytes",
+ "tokio",
+]
 
 [[package]]
 name = "slab"

@@ -9,3 +9,4 @@ axum = { version = "0.4.4", features = ["headers"] }
 tokio = { version = "1.16.1", features = ["macros", "rt-multi-thread"] }
 tower-http = { version = "0.2.1", features = ["fs"] }
 tower-cookies = "0.4.1"
+skytable = { version = "0.6.2", features = ["async"], default-features = false }
