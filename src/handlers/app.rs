@@ -21,6 +21,15 @@ use skytable::pool::AsyncPool;
 pub async fn app(uname: String, _db: AsyncPool) -> (StatusCode, Html<String>) {
     resp(
         StatusCode::OK,
-        format!("<html>Hey, {uname}! Welcome to Jotsy &mdash; it's just around the corner</html>"),
+        format!(
+            r#"
+            <html>
+            <h1>Hey, {uname}! Welcome to Jotsy &mdash; it's just around the corner</h1>
+            <form action="/logout" method="post">
+            <input type="submit" value="Click to Logout">
+            </form> 
+            </html>
+            "#
+        ),
     )
 }

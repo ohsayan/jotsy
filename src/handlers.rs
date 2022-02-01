@@ -16,13 +16,17 @@
 
 mod app;
 mod login;
+mod logout;
 mod root;
 mod signup;
+
 pub use self::{
     login::{login, login_get},
+    logout::logout,
     root::root,
     signup::{signup, signup_get},
 };
+
 use crate::templates::REDIRECT_HOME;
 use axum::response::Html;
 use tower_cookies::Cookies;
