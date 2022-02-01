@@ -16,3 +16,4 @@
 
 pub const LOGIN_PAGE: &str = include_str!("../templates/login.html");
 pub const REDIRECT_HOME: &str = include_str!("../templates/redirect.html");
+pub const SIGN_UP: &'static str = include_str!("../templates/signup.html");

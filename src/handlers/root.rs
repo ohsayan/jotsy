@@ -14,15 +14,15 @@
  * limitations under the License.
 */
 
-use axum::{extract::Extension, http::StatusCode, response::Html};
+use axum::{extract::Extension, http::StatusCode};
 use tower_cookies::{Cookie, Cookies};
 
 use super::{COOKIE_TOKEN, COOKIE_USERNAME};
 use crate::{
     templates::{LOGIN_PAGE, REDIRECT_HOME},
-    util::resp,
+    util::{self, resp},
 };
-use bcrypt::{hash, DEFAULT_COST};
+
 use skytable::{
     actions::AsyncActions,
     aio::Connection,
@@ -32,10 +32,7 @@ use skytable::{
     RespCode,
 };
 
-pub async fn root(
-    cookies: Cookies,
-    Extension(db): Extension<AsyncPool>,
-) -> (StatusCode, Html<String>) {
+pub async fn root(cookies: Cookies, Extension(db): Extension<AsyncPool>) -> crate::RespTuple {
     // our database has hash(tokens) -> username
     // so we need to send the hash of the token and see if the returne value
     let mut con = match db.get().await {
@@ -73,7 +70,8 @@ pub enum VerifyStatus {
 }
 
 async fn verify_user<'a>(con: &mut Connection, uname: &'a str, token: &'a str) -> VerifyStatus {
-    let ret: Result<String, Error> = con.get(hash(token, DEFAULT_COST).unwrap()).await;
+    let hash = util::sha2(token);
+    let ret: Result<String, Error> = con.get(hash).await;
     match ret {
         Ok(v) if v.eq(uname) => VerifyStatus::Yes,
         Ok(_) => VerifyStatus::No,

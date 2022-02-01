@@ -16,6 +16,7 @@
 
 use axum::{
     http::StatusCode,
+    response::Html,
     routing::{get, get_service, post},
     AddExtensionLayer, Router,
 };
@@ -28,13 +29,14 @@ use tower_cookies::CookieManagerLayer;
 use tower_http::services::ServeDir;
 // modules
 mod handlers;
-mod util;
 mod templates;
+mod util;
 
 const JOTSY_BIND_HOST: IpAddr = IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1));
 const JOTSY_BIND_PORT: u16 = 2022;
 
 type DynResult<T> = Result<T, Box<dyn std::error::Error>>;
+type RespTuple = (StatusCode, Html<String>);
 
 #[tokio::main]
 async fn main() -> DynResult<()> {
@@ -48,6 +50,9 @@ async fn main() -> DynResult<()> {
         // this is our GET for /
         .route("/", get(handlers::root))
         .route("/login", post(handlers::login))
+        .route("/login", get(handlers::login_get))
+        .route("/signup", post(handlers::signup))
+        .route("/signup", get(handlers::signup_get))
         // mount our static assets
         .nest(
             "/static",

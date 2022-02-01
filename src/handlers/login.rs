@@ -17,16 +17,16 @@
 use super::{COOKIE_TOKEN, COOKIE_USERNAME};
 use crate::{
     templates::{LOGIN_PAGE, REDIRECT_HOME},
-    util::{create_cookie, resp},
+    util::{self, create_cookie, resp},
 };
 use axum::{
     extract::{Extension, Form},
     http::StatusCode,
     response::Html,
 };
-use bcrypt::DEFAULT_COST;
 use rand::Rng;
 use serde::Deserialize;
+use skytable::aio::Connection;
 use skytable::{actions::AsyncActions, ddl::AsyncDdl, error::Error, pool::AsyncPool};
 use tower_cookies::Cookies;
 
@@ -36,11 +36,33 @@ pub struct Login {
     password: String,
 }
 
+pub async fn login_get(cookies: Cookies) -> Html<&'static str> {
+    super::redirect_home_if_cookie_set(cookies, LOGIN_PAGE).await
+}
+
+pub(super) async fn authenticate(
+    uname: String,
+    cookies: &mut Cookies,
+    con: &mut Connection,
+) -> crate::RespTuple {
+    // sweet, we're verified
+    // generate a token
+    let token = generate_token();
+    // hash the token
+    let token_hash = util::sha2(&token);
+    // store the hash in the DB
+    con.set(token_hash, &uname).await.unwrap();
+    // now set cookies
+    cookies.add(create_cookie(COOKIE_USERNAME, &uname));
+    cookies.add(create_cookie(COOKIE_TOKEN, token));
+    resp(StatusCode::OK, REDIRECT_HOME)
+}
+
 pub async fn login(
-    cookies: Cookies,
+    mut cookies: Cookies,
     Extension(db): Extension<AsyncPool>,
     Form(lgn): Form<Login>,
-) -> (StatusCode, Html<String>) {
+) -> crate::RespTuple {
     /*
     Login flow:
     1. Get the hashed password from the DB
@@ -57,24 +79,8 @@ pub async fn login(
     con.switch("default:jotsyauth").await.unwrap();
     let hash_from_db: Result<String, Error> = con.get(&lgn.username).await;
     match hash_from_db {
-        Ok(v) if bcrypt::verify(&lgn.password, &v).unwrap() => {
-            // sweet, we're verified
-            // generate a token
-            let token = generate_token();
-            // hash the token
-            let token_hash = bcrypt::hash(&token, DEFAULT_COST).unwrap();
-            // store the hash in the DB
-            con.set(token_hash, &lgn.username).await.unwrap();
-            // now set cookies
-            cookies.add(create_cookie(COOKIE_USERNAME, &lgn.username));
-            cookies.add(create_cookie(COOKIE_TOKEN, token));
-            resp(
-                StatusCode::OK,
-                format!(
-                    "<h1>Hey, {name}! We've authenticated you and saved your session",
-                    name = lgn.username
-                ),
-            )
+        Ok(v) if util::bcrypt_verify(&lgn.password, &v) => {
+            authenticate(lgn.username, &mut cookies, &mut con).await
         }
         Ok(_) => {
             // nope, unverified

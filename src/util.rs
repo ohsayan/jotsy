@@ -15,13 +15,14 @@
 */
 
 use axum::{http::StatusCode, response::Html};
+use sha2::{Digest, Sha256};
 use skytable::pool::AsyncPool;
 use skytable::Query;
 use time::{Duration, OffsetDateTime};
 use tower_cookies::Cookie;
 
-const CREATE_JOTSY_TABLE_AUTH: &str = "create table jotsyauth keymap(binstr,binstr)";
-const CREATE_JOTSY_TABLE_NOTES: &str = "create table jotsynotes keymap(str,list<str>)";
+const CREATE_JOTSY_TABLE_AUTH: &str = "create table default:jotsyauth keymap(binstr,binstr)";
+const CREATE_JOTSY_TABLE_NOTES: &str = "create table default:jotsynotes keymap(str,list<str>)";
 
 pub fn query(q: &str) -> Query {
     let q: Vec<&str> = q.split_ascii_whitespace().collect();
@@ -59,4 +60,20 @@ pub fn create_cookie(name: impl ToString, value: impl ToString) -> Cookie<'stati
     now += Duration::days(15);
     c.set_expires(now);
     c
+}
+
+pub fn bcrypt_hash(input: impl AsRef<[u8]>) -> String {
+    bcrypt::hash(input, bcrypt::DEFAULT_COST).unwrap()
+}
+
+pub fn bcrypt_verify(pass: impl AsRef<[u8]>, hash: impl AsRef<str>) -> bool {
+    bcrypt::verify(pass, hash.as_ref()).unwrap()
+}
+
+/// Hash the input and return a formatted hex
+pub fn sha2(input: impl AsRef<[u8]>) -> String {
+    let mut h = Sha256::new();
+    h.update(input);
+    let ret = h.finalize();
+    format!("{:X}", ret)
 }

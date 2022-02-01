@@ -17,7 +17,24 @@
 mod app;
 mod login;
 mod root;
-pub use self::{login::login, root::root};
-
+mod signup;
+pub use self::{
+    login::{login, login_get},
+    root::root,
+    signup::{signup, signup_get},
+};
+use crate::templates::REDIRECT_HOME;
+use axum::response::Html;
+use tower_cookies::Cookies;
 const COOKIE_USERNAME: &str = "jotsy_user";
 const COOKIE_TOKEN: &str = "jotsy_token";
+
+async fn redirect_home_if_cookie_set(cookies: Cookies, page: &'static str) -> Html<&'static str> {
+    if cookies.get(COOKIE_TOKEN).is_some() || cookies.get(COOKIE_USERNAME).is_some() {
+        // someone set the cookies but still ended up here, so redirect them to root to handle
+        // the login cookie state
+        return Html::from(REDIRECT_HOME);
+    } else {
+        Html::from(page)
+    }
+}
