@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, Sayan Nandan <nandansayan@outlook.com>
+ * Copyright 2022 Sayan Nandan <nandansayan@outlook.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,13 @@
  * limitations under the License.
 */
 
-mod app;
-mod login;
-mod root;
-pub use self::{login::login, root::root};
+use crate::util::resp;
+use axum::{http::StatusCode, response::Html};
+use skytable::pool::AsyncPool;
 
-const COOKIE_USERNAME: &str = "jotsy_user";
-const COOKIE_TOKEN: &str = "jotsy_token";
+pub async fn app(uname: String, _db: AsyncPool) -> (StatusCode, Html<String>) {
+    resp(
+        StatusCode::OK,
+        format!("<html>Hey, {uname}! Welcome to Jotsy &mdash; it's just around the corner</html>"),
+    )
+}

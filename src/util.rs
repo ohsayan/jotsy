@@ -17,6 +17,8 @@
 use axum::{http::StatusCode, response::Html};
 use skytable::pool::AsyncPool;
 use skytable::Query;
+use time::{Duration, OffsetDateTime};
+use tower_cookies::Cookie;
 
 const CREATE_JOTSY_TABLE_AUTH: &str = "create table jotsyauth keymap(binstr,binstr)";
 const CREATE_JOTSY_TABLE_NOTES: &str = "create table jotsynotes keymap(str,list<str>)";
@@ -48,4 +50,13 @@ pub async fn create_tables(pool: &AsyncPool) -> crate::DynResult<()> {
 
 pub fn resp(code: StatusCode, body: impl ToString) -> (StatusCode, Html<String>) {
     (code, Html::from(body.to_string()))
+}
+
+pub fn create_cookie(name: impl ToString, value: impl ToString) -> Cookie<'static> {
+    let mut c = Cookie::new(name.to_string(), value.to_string());
+    #[allow(deprecated)] // this is because of the tower-cookies crate
+    let mut now = OffsetDateTime::now();
+    now += Duration::days(15);
+    c.set_expires(now);
+    c
 }

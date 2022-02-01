@@ -16,7 +16,7 @@
 
 use axum::{
     http::StatusCode,
-    routing::{get, get_service},
+    routing::{get, get_service, post},
     AddExtensionLayer, Router,
 };
 use skytable::pool;
@@ -29,6 +29,7 @@ use tower_http::services::ServeDir;
 // modules
 mod handlers;
 mod util;
+mod templates;
 
 const JOTSY_BIND_HOST: IpAddr = IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1));
 const JOTSY_BIND_PORT: u16 = 2022;
@@ -46,6 +47,7 @@ async fn main() -> DynResult<()> {
     let router = Router::new()
         // this is our GET for /
         .route("/", get(handlers::root))
+        .route("/login", post(handlers::login))
         // mount our static assets
         .nest(
             "/static",

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, Sayan Nandan <nandansayan@outlook.com>
+ * Copyright 2022 Sayan Nandan <nandansayan@outlook.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,5 @@
  * limitations under the License.
 */
 
-mod app;
-mod login;
-mod root;
-pub use self::{login::login, root::root};
-
-const COOKIE_USERNAME: &str = "jotsy_user";
-const COOKIE_TOKEN: &str = "jotsy_token";
+pub const LOGIN_PAGE: &str = include_str!("../templates/login.html");
+pub const REDIRECT_HOME: &str = include_str!("../templates/redirect.html");

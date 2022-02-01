@@ -17,20 +17,20 @@
 use axum::{extract::Extension, http::StatusCode, response::Html};
 use tower_cookies::{Cookie, Cookies};
 
-use crate::util::resp;
+use super::{COOKIE_TOKEN, COOKIE_USERNAME};
+use crate::{
+    templates::{LOGIN_PAGE, REDIRECT_HOME},
+    util::resp,
+};
 use bcrypt::{hash, DEFAULT_COST};
 use skytable::{
     actions::AsyncActions,
     aio::Connection,
+    ddl::AsyncDdl,
     error::{Error, SkyhashError},
     pool::AsyncPool,
     RespCode,
 };
-
-const LOGIN_PAGE: &str = include_str!("../../templates/login.html");
-const REDIRECT_HOME: &str = include_str!("../../templates/redirect.html");
-const COOKIE_USERNAME: &str = "jotsy_user";
-const COOKIE_TOKEN: &str = "jotsy_token";
 
 pub async fn root(
     cookies: Cookies,
@@ -42,24 +42,23 @@ pub async fn root(
         Ok(c) => c,
         Err(_) => return resp(StatusCode::INTERNAL_SERVER_ERROR, REDIRECT_HOME),
     };
+    con.switch("default:jotsyauth").await.unwrap();
     let username = cookies.get(COOKIE_USERNAME);
     let token = cookies.get(COOKIE_TOKEN);
     match (username, token) {
         (Some(uname), Some(token)) => {
             let (uname_v, token_v) = (uname.value().to_owned(), token.value().to_owned());
-            match verify_user(&mut con, &uname_v, &token_v).await {
+            let verify_status = verify_user(&mut con, &uname_v, &token_v).await;
+            drop(con); // return con to the pool; also helps borrowck
+            match verify_status {
                 VerifyStatus::No => {
+                    // auth failed, so we should remove these cookies; else we'll keep on
+                    // bumping into these
                     cookies.remove(Cookie::new(COOKIE_USERNAME, uname_v));
                     cookies.remove(Cookie::new(COOKIE_TOKEN, token_v));
                     resp(StatusCode::UNAUTHORIZED, REDIRECT_HOME)
                 }
-                VerifyStatus::Yes => resp(
-                    StatusCode::OK,
-                    format!(
-                        "Welcome, {name}! We're currently under construction",
-                        name = uname_v
-                    ),
-                ),
+                VerifyStatus::Yes => super::app::app(uname_v, db).await,
                 VerifyStatus::ServerError => resp(StatusCode::INTERNAL_SERVER_ERROR, REDIRECT_HOME),
             }
         }
