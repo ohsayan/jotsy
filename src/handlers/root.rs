@@ -14,18 +14,22 @@
  * limitations under the License.
 */
 
-use axum::response::{Html, IntoResponse};
+use axum::{
+    extract::Extension,
+    response::{Html, IntoResponse},
+};
+use skytable::pool::AsyncPool;
 use tower_cookies::Cookies;
 
 const COOKIE_USERNAME: &str = "jotsy_user";
 const COOKIE_TOKEN: &str = "jotsy_token";
 const LOGIN_PAGE: &str = include_str!("../../templates/login.html");
 
-pub async fn root(cookies: Cookies) -> impl IntoResponse {
+pub async fn root(cookies: Cookies, Extension(sky): Extension<AsyncPool>) -> impl IntoResponse {
     let username = cookies.get(COOKIE_USERNAME);
     let token = cookies.get(COOKIE_TOKEN);
     match (username, token) {
-        (Some(uname), Some(token)) => super::app::app(uname, token).await,
+        (Some(uname), Some(token)) => super::app::app(uname, token, sky).await,
         _ => login_page().await,
     }
 }

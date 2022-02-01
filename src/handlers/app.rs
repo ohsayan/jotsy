@@ -15,9 +15,10 @@
 */
 
 use axum::response::Html;
+use skytable::pool::AsyncPool;
 use tower_cookies::Cookie;
 
-pub async fn app(uname: Cookie<'_>, _token: Cookie<'_>) -> Html<String> {
+pub async fn app(uname: Cookie<'_>, _token: Cookie<'_>, _db: AsyncPool) -> Html<String> {
     Html::from(format!(
         "<html>Hello, {name}! This page is under construction</html>",
         name = uname.value()
