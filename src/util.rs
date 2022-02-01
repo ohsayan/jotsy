@@ -14,6 +14,7 @@
  * limitations under the License.
 */
 
+use axum::{http::StatusCode, response::Html};
 use skytable::pool::AsyncPool;
 use skytable::Query;
 
@@ -43,4 +44,8 @@ pub async fn create_tables(pool: &AsyncPool) -> crate::DynResult<()> {
     check_error(r1);
     check_error(r2);
     Ok(())
+}
+
+pub fn resp(code: StatusCode, body: impl ToString) -> (StatusCode, Html<String>) {
+    (code, Html::from(body.to_string()))
 }

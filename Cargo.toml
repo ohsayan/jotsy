@@ -12,3 +12,4 @@ tower-cookies = "0.4.1"
 skytable = { version = "0.7.0-alpha.4", features = [
     "aio",
 ], default-features = false }
+bcrypt = "0.10.1"
