@@ -15,6 +15,7 @@
 */
 
 mod app;
+pub mod assets;
 mod login;
 mod logout;
 mod root;
