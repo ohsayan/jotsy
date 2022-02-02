@@ -5,17 +5,28 @@ edition = "2021"
 authors = ["Sayan Nandan <nandansayan@outlook.com>"]
 
 [dependencies]
+# networking
 axum = { version = "0.4.4", features = ["headers"] }
-tokio = { version = "1.16.1", features = ["macros", "rt-multi-thread"] }
-tower-http = { version = "0.2.1", features = ["fs"] }
-tower-cookies = "0.4.1"
+tokio = { version = "1.16.1", features = [
+    "macros",
+    "rt-multi-thread",
+    "signal",
+] }
 skytable = { version = "0.7.0-alpha.4", features = [
     "aio",
 ], default-features = false }
-bcrypt = "0.10.1"
-serde = { version = "1.0.136", features = ["derive"] }
-rand = "0.8.4"
-time = "0.2.11"
+# http
 cookie = "0.16.0"
-sha2 = "0.10.1"
+tower-http = { version = "0.2.1", features = ["fs"] }
+tower-cookies = "0.4.1"
+# templating and ser/de
 askama = { version = "0.11.0" }
+serde = { version = "1.0.136", features = ["derive"] }
+# tokens and auth
+bcrypt = "0.10.1"
+sha2 = "0.10.1"
+rand = "0.8.4"
+# utility
+time = "0.2.11"
+env_logger = "0.9.0"
+log = "0.4.14"

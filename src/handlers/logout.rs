@@ -36,11 +36,9 @@ pub async fn logout(
 ) -> crate::RespTuple {
     let mut con = match db.get().await {
         Ok(c) => c,
-        Err(_) => {
-            return resp(
-                StatusCode::INTERNAL_SERVER_ERROR,
-                RedirectHome::new("Internal server error."),
-            )
+        Err(e) => {
+            log::error!("Failed to get connection from pool: {e}");
+            return resp(StatusCode::INTERNAL_SERVER_ERROR, RedirectHome::e500());
         }
     };
     let c_user = cookies.get(super::COOKIE_USERNAME);

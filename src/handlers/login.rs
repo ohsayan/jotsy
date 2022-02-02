@@ -26,8 +26,14 @@ use axum::{
 };
 use rand::Rng;
 use serde::Deserialize;
-use skytable::aio::Connection;
-use skytable::{actions::AsyncActions, ddl::AsyncDdl, error::Error, pool::AsyncPool};
+use skytable::{
+    actions::AsyncActions,
+    aio::Connection,
+    ddl::AsyncDdl,
+    error::{Error, SkyhashError},
+    pool::AsyncPool,
+    RespCode,
+};
 use tower_cookies::Cookies;
 
 #[derive(Deserialize)]
@@ -74,9 +80,12 @@ pub async fn login(
     */
     let mut con = match db.get().await {
         Ok(c) => c,
-        Err(_) => return resp(StatusCode::INTERNAL_SERVER_ERROR, RedirectHome::e500()),
+        Err(e) => {
+            log::error!("Failed to get connection from pool: {e}");
+            return resp(StatusCode::INTERNAL_SERVER_ERROR, RedirectHome::e500());
+        }
     };
-    con.switch("default:jotsyauth").await.unwrap();
+    con.switch(crate::TABLE_AUTH).await.unwrap();
     let hash_from_db: Result<String, Error> = con.get(&lgn.username).await;
     match hash_from_db {
         Ok(v) if util::bcrypt_verify(&lgn.password, &v) => {
@@ -86,12 +95,19 @@ pub async fn login(
             // nope, unverified
             resp(StatusCode::UNAUTHORIZED, LoginPage::new(true))
         }
-        Err(_) => resp(StatusCode::INTERNAL_SERVER_ERROR, RedirectHome::e500()),
+        Err(Error::SkyError(SkyhashError::Code(RespCode::NotFound))) => {
+            resp(StatusCode::NOT_FOUND, LoginPage::new(true))
+        }
+        Err(e) => {
+            log::error!("Failed to log user in: {}", e);
+            resp(StatusCode::INTERNAL_SERVER_ERROR, RedirectHome::e500())
+        }
     }
 }
 
-const CHARSET: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789)(*&^%$#@!~";
-const TOKEN_LEN: usize = 24;
+const CHARSET: &[u8] =
+    b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_=+[]{}\\|;:'\"<>./~";
+const TOKEN_LEN: usize = 32;
 
 fn generate_token() -> String {
     (0..TOKEN_LEN)

@@ -34,15 +34,22 @@ mod util;
 
 const JOTSY_BIND_HOST: IpAddr = IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1));
 const JOTSY_BIND_PORT: u16 = 2022;
+const TABLE_AUTH: &str = "default:jotsyauth";
 
 type DynResult<T> = Result<T, Box<dyn std::error::Error>>;
 type RespTuple = (StatusCode, Html<String>);
 
 #[tokio::main]
 async fn main() -> DynResult<()> {
+    // configure our logger
+    env_logger::Builder::new()
+        .parse_filters(&std::env::var("JOTSY_LOG").unwrap_or_else(|_| "info".to_owned()))
+        .init();
     // get our skytable instance
     let pool = pool::get_async("127.0.0.1", 2003, 10).await?;
+    log::trace!("Connected to Skytable pool");
     util::create_tables(&pool).await?;
+    log::trace!("Created/reinitialized tables");
     // this is our host:port
     let addr = SocketAddr::new(JOTSY_BIND_HOST, JOTSY_BIND_PORT);
     // create the routes
@@ -69,8 +76,11 @@ async fn main() -> DynResult<()> {
         // add the database "layer"
         .layer(AddExtensionLayer::new(pool));
     // now run the service
-    axum::Server::bind(&addr)
-        .serve(router.into_make_service())
-        .await?;
+    log::info!("Running server on http://127.0.0.1:2022/");
+    tokio::select! {
+        _ = axum::Server::bind(&addr).serve(router.into_make_service()) => {}
+        _ = tokio::signal::ctrl_c() => {}
+    }
+    log::info!("Finished serving. Goodbye!");
     Ok(())
 }

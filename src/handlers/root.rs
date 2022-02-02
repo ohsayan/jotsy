@@ -37,9 +37,12 @@ pub async fn root(cookies: Cookies, Extension(db): Extension<AsyncPool>) -> crat
     // so we need to send the hash of the token and see if the returne value
     let mut con = match db.get().await {
         Ok(c) => c,
-        Err(_) => return resp(StatusCode::INTERNAL_SERVER_ERROR, RedirectHome::e500()),
+        Err(e) => {
+            log::error!("Failed to get connection from pool: {e}");
+            return resp(StatusCode::INTERNAL_SERVER_ERROR, RedirectHome::e500());
+        }
     };
-    con.switch("default:jotsyauth").await.unwrap();
+    con.switch(crate::TABLE_AUTH).await.unwrap();
     let username = cookies.get(COOKIE_USERNAME);
     let token = cookies.get(COOKIE_TOKEN);
     match (username, token) {

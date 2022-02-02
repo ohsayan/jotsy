@@ -54,20 +54,25 @@ pub async fn signup(
     let hash = util::bcrypt_hash(&data.password);
     let mut con = match db.get().await {
         Ok(c) => c,
-        Err(_) => return resp(StatusCode::INTERNAL_SERVER_ERROR, RedirectHome::e500()),
+        Err(e) => {
+            log::error!("Failed to get connection from pool: {e}");
+            return resp(StatusCode::INTERNAL_SERVER_ERROR, RedirectHome::e500());
+        }
     };
-    con.switch("default:jotsyauth").await.unwrap();
+    con.switch(crate::TABLE_AUTH).await.unwrap();
     match con.set(data.username.clone(), hash).await {
         Ok(created_new) if created_new => {
             // cool, we did well
+            log::info!("New user `{uname}` created.", uname = data.username);
             super::login::authenticate(data.username, &mut cookies, &mut con).await
         }
         Ok(_) => {
             // nope, username is taken
             resp(StatusCode::CONFLICT, SignupPage::new(true))
         }
-        Err(_) => {
+        Err(e) => {
             // server error
+            log::error!("Failed to create user: {e}");
             resp(StatusCode::INTERNAL_SERVER_ERROR, RedirectHome::e500())
         }
     }
