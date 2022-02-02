@@ -55,8 +55,8 @@ async fn main() -> DynResult<()> {
         .route("/login", post(handlers::login))
         .route("/login", get(handlers::login_get))
         .route(
-            "/static/css/index.css",
-            get(|| async move { templates::CSS_INDEX }),
+            "/static/css/login.css",
+            get(|| async move { templates::CSS_INDEX_LOGIN }),
         )
         .route("/signup", post(handlers::signup))
         .route("/signup", get(handlers::signup_get))

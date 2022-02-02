@@ -16,7 +16,7 @@
 
 use askama::Template;
 
-pub const CSS_INDEX: &str = include_str!("../static/css/login.css");
+pub const CSS_INDEX_LOGIN: &str = include_str!("../static/css/login.css");
 
 #[derive(Template)]
 #[template(path = "login.html")]
