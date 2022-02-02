@@ -17,7 +17,20 @@
       <form action="/login" method="post">
         <h1 class="mb-4">Jotsy</h1>
         <h1 class="h3 mb-3 fw-normal">Get logged in.</h1>
-
+        {% if login_failed %}
+        <div
+          class="alert alert-danger alert-dismissible fade show align-items-center"
+          role="alert"
+        >
+          Incorrect username or password
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close"
+          ></button>
+        </div>
+        {% endif %}
         <div class="form-floating">
           <input
             type="text"

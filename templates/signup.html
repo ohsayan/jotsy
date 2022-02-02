@@ -17,6 +17,20 @@
       <form action="/signup" method="post">
         <h1 class="mb-4">Jotsy</h1>
         <h1 class="h3 mb-3 fw-normal">Get signed up.</h1>
+        {% if conflict %}
+        <div
+          class="alert alert-danger alert-dismissible fade show align-items-center"
+          role="alert"
+        >
+          That username is taken
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close"
+          ></button>
+        </div>
+        {% endif %}
 
         <div class="form-floating">
           <input
@@ -52,7 +66,7 @@
           <label for="floatVpassword">Verify password</label>
         </div>
         <button class="w-100 btn btn-lg btn-primary" type="submit">
-          Sign in
+          Sign up
         </button>
       </form>
       <div class="checkbox mb-3 my-2">

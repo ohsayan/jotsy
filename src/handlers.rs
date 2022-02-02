@@ -27,17 +27,17 @@ pub use self::{
     signup::{signup, signup_get},
 };
 
-use crate::templates::REDIRECT_HOME;
+use crate::templates::RedirectHome;
 use axum::response::Html;
 use tower_cookies::Cookies;
 const COOKIE_USERNAME: &str = "jotsy_user";
 const COOKIE_TOKEN: &str = "jotsy_token";
 
-async fn redirect_home_if_cookie_set(cookies: Cookies, page: &'static str) -> Html<&'static str> {
+async fn redirect_home_if_cookie_set(cookies: Cookies, page: String) -> Html<String> {
     if cookies.get(COOKIE_TOKEN).is_some() || cookies.get(COOKIE_USERNAME).is_some() {
         // someone set the cookies but still ended up here, so redirect them to root to handle
         // the login cookie state
-        return Html::from(REDIRECT_HOME);
+        return Html::from(RedirectHome::new(""));
     } else {
         Html::from(page)
     }

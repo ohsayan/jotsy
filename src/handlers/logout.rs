@@ -15,7 +15,7 @@
 */
 
 use crate::{
-    templates::REDIRECT_HOME,
+    templates::RedirectHome,
     util::{self, resp},
 };
 use axum::{
@@ -36,7 +36,12 @@ pub async fn logout(
 ) -> crate::RespTuple {
     let mut con = match db.get().await {
         Ok(c) => c,
-        Err(_) => return resp(StatusCode::INTERNAL_SERVER_ERROR, REDIRECT_HOME),
+        Err(_) => {
+            return resp(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                RedirectHome::new("Internal server error."),
+            )
+        }
     };
     let c_user = cookies.get(super::COOKIE_USERNAME);
     let c_token = cookies.get(super::COOKIE_TOKEN);
@@ -49,14 +54,23 @@ pub async fn logout(
             // now remove these cookies
             cookies.remove(Cookie::new(super::COOKIE_USERNAME, user));
             cookies.remove(Cookie::new(super::COOKIE_TOKEN, token));
-            resp(StatusCode::OK, REDIRECT_HOME)
+            resp(
+                StatusCode::OK,
+                RedirectHome::new("Logged out successfully."),
+            )
         }
         (Some(cookie), None) | (None, Some(cookie)) => {
             let (c_key, c_v) = (cookie.name().to_owned(), cookie.value().to_owned());
             // random cookies, just pop them
             cookies.remove(Cookie::new(c_key, c_v));
-            resp(StatusCode::OK, REDIRECT_HOME)
+            resp(
+                StatusCode::OK,
+                RedirectHome::new("Invalid cookies detected and removed."),
+            )
         }
-        (None, None) => resp(StatusCode::NOT_ACCEPTABLE, REDIRECT_HOME),
+        (None, None) => resp(
+            StatusCode::NOT_ACCEPTABLE,
+            RedirectHome::new("Unexpected request to /logout"),
+        ),
     }
 }

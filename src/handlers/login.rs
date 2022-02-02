@@ -16,7 +16,7 @@
 
 use super::{COOKIE_TOKEN, COOKIE_USERNAME};
 use crate::{
-    templates::{LOGIN_PAGE, REDIRECT_HOME},
+    templates::{LoginPage, RedirectHome},
     util::{self, create_cookie, resp},
 };
 use axum::{
@@ -36,8 +36,8 @@ pub struct Login {
     password: String,
 }
 
-pub async fn login_get(cookies: Cookies) -> Html<&'static str> {
-    super::redirect_home_if_cookie_set(cookies, LOGIN_PAGE).await
+pub async fn login_get(cookies: Cookies) -> Html<String> {
+    super::redirect_home_if_cookie_set(cookies, LoginPage::new(false)).await
 }
 
 pub(super) async fn authenticate(
@@ -55,7 +55,7 @@ pub(super) async fn authenticate(
     // now set cookies
     cookies.add(create_cookie(COOKIE_USERNAME, &uname));
     cookies.add(create_cookie(COOKIE_TOKEN, token));
-    resp(StatusCode::OK, REDIRECT_HOME)
+    resp(StatusCode::OK, RedirectHome::new("Logged in successfully."))
 }
 
 pub async fn login(
@@ -74,7 +74,7 @@ pub async fn login(
     */
     let mut con = match db.get().await {
         Ok(c) => c,
-        Err(_) => return resp(StatusCode::INTERNAL_SERVER_ERROR, REDIRECT_HOME),
+        Err(_) => return resp(StatusCode::INTERNAL_SERVER_ERROR, RedirectHome::e500()),
     };
     con.switch("default:jotsyauth").await.unwrap();
     let hash_from_db: Result<String, Error> = con.get(&lgn.username).await;
@@ -84,9 +84,9 @@ pub async fn login(
         }
         Ok(_) => {
             // nope, unverified
-            resp(StatusCode::UNAUTHORIZED, LOGIN_PAGE)
+            resp(StatusCode::UNAUTHORIZED, LoginPage::new(true))
         }
-        Err(_) => resp(StatusCode::INTERNAL_SERVER_ERROR, REDIRECT_HOME),
+        Err(_) => resp(StatusCode::INTERNAL_SERVER_ERROR, RedirectHome::e500()),
     }
 }
 

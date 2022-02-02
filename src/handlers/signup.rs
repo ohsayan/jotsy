@@ -15,7 +15,7 @@
 */
 
 use crate::{
-    templates::{REDIRECT_HOME, SIGN_UP},
+    templates::{RedirectHome, SignupPage},
     util::{self, resp},
 };
 use axum::{
@@ -34,8 +34,8 @@ pub struct SignupForm {
     vpassword: String,
 }
 
-pub async fn signup_get(cookies: Cookies) -> Html<&'static str> {
-    super::redirect_home_if_cookie_set(cookies, SIGN_UP).await
+pub async fn signup_get(cookies: Cookies) -> Html<String> {
+    super::redirect_home_if_cookie_set(cookies, SignupPage::new(false)).await
 }
 
 pub async fn signup(
@@ -54,7 +54,7 @@ pub async fn signup(
     let hash = util::bcrypt_hash(&data.password);
     let mut con = match db.get().await {
         Ok(c) => c,
-        Err(_) => return resp(StatusCode::INTERNAL_SERVER_ERROR, REDIRECT_HOME),
+        Err(_) => return resp(StatusCode::INTERNAL_SERVER_ERROR, RedirectHome::e500()),
     };
     con.switch("default:jotsyauth").await.unwrap();
     match con.set(data.username.clone(), hash).await {
@@ -64,11 +64,11 @@ pub async fn signup(
         }
         Ok(_) => {
             // nope, username is taken
-            resp(StatusCode::CONFLICT, "Sorry, that username is taken")
+            resp(StatusCode::CONFLICT, SignupPage::new(true))
         }
         Err(_) => {
             // server error
-            resp(StatusCode::INTERNAL_SERVER_ERROR, REDIRECT_HOME)
+            resp(StatusCode::INTERNAL_SERVER_ERROR, RedirectHome::e500())
         }
     }
 }

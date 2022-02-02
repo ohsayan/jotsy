@@ -19,7 +19,7 @@ use tower_cookies::{Cookie, Cookies};
 
 use super::{COOKIE_TOKEN, COOKIE_USERNAME};
 use crate::{
-    templates::{LOGIN_PAGE, REDIRECT_HOME},
+    templates::{LoginPage, RedirectHome},
     util::{self, resp},
 };
 
@@ -37,7 +37,7 @@ pub async fn root(cookies: Cookies, Extension(db): Extension<AsyncPool>) -> crat
     // so we need to send the hash of the token and see if the returne value
     let mut con = match db.get().await {
         Ok(c) => c,
-        Err(_) => return resp(StatusCode::INTERNAL_SERVER_ERROR, REDIRECT_HOME),
+        Err(_) => return resp(StatusCode::INTERNAL_SERVER_ERROR, RedirectHome::e500()),
     };
     con.switch("default:jotsyauth").await.unwrap();
     let username = cookies.get(COOKIE_USERNAME);
@@ -53,13 +53,18 @@ pub async fn root(cookies: Cookies, Extension(db): Extension<AsyncPool>) -> crat
                     // bumping into these
                     cookies.remove(Cookie::new(COOKIE_USERNAME, uname_v));
                     cookies.remove(Cookie::new(COOKIE_TOKEN, token_v));
-                    resp(StatusCode::UNAUTHORIZED, REDIRECT_HOME)
+                    resp(
+                        StatusCode::UNAUTHORIZED,
+                        RedirectHome::new("Found outdated or invalid cookies."),
+                    )
                 }
                 VerifyStatus::Yes => super::app::app(uname_v, db).await,
-                VerifyStatus::ServerError => resp(StatusCode::INTERNAL_SERVER_ERROR, REDIRECT_HOME),
+                VerifyStatus::ServerError => {
+                    resp(StatusCode::INTERNAL_SERVER_ERROR, RedirectHome::e500())
+                }
             }
         }
-        _ => resp(StatusCode::OK, LOGIN_PAGE),
+        _ => resp(StatusCode::OK, LoginPage::new(false)),
     }
 }
 

@@ -14,6 +14,51 @@
  * limitations under the License.
 */
 
-pub const LOGIN_PAGE: &str = include_str!("../templates/login.html");
-pub const REDIRECT_HOME: &str = include_str!("../templates/redirect.html");
-pub const SIGN_UP: &'static str = include_str!("../templates/signup.html");
+use askama::Template;
+
+#[derive(Template)]
+#[template(path = "login.html")]
+pub struct LoginPage {
+    login_failed: bool,
+}
+
+impl LoginPage {
+    pub fn new(login_failed: bool) -> String {
+        Self { login_failed }.render().unwrap()
+    }
+}
+
+#[derive(Template)]
+#[template(path = "redirect.html")]
+pub struct RedirectHome {
+    message: String,
+}
+
+impl RedirectHome {
+    pub fn new(message: impl ToString) -> String {
+        RedirectHome {
+            message: message.to_string(),
+        }
+        .render()
+        .unwrap()
+    }
+    pub fn e500() -> String {
+        RedirectHome {
+            message: "An internal server error occurred.".to_owned(),
+        }
+        .render()
+        .unwrap()
+    }
+}
+
+#[derive(Template)]
+#[template(path = "signup.html")]
+pub struct SignupPage {
+    conflict: bool,
+}
+
+impl SignupPage {
+    pub fn new(conflict: bool) -> String {
+        Self { conflict }.render().unwrap()
+    }
+}
