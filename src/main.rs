@@ -17,16 +17,12 @@
 use axum::{
     http::StatusCode,
     response::Html,
-    routing::{get, get_service, post},
+    routing::{get, post},
     AddExtensionLayer, Router,
 };
 use skytable::pool;
-use std::{
-    io::Error as IoError,
-    net::{IpAddr, Ipv4Addr, SocketAddr},
-};
+use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use tower_cookies::CookieManagerLayer;
-use tower_http::services::ServeDir;
 // modules
 mod handlers;
 mod templates;
@@ -58,19 +54,13 @@ async fn main() -> DynResult<()> {
         .route("/", get(handlers::root))
         .route("/login", post(handlers::login))
         .route("/login", get(handlers::login_get))
+        .route(
+            "/static/css/index.css",
+            get(|| async move { templates::CSS_INDEX }),
+        )
         .route("/signup", post(handlers::signup))
         .route("/signup", get(handlers::signup_get))
         .route("/logout", post(handlers::logout))
-        // mount our static assets
-        .nest(
-            "/static",
-            get_service(ServeDir::new("static/")).handle_error(|error: IoError| async move {
-                (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    format!("Unhandled fs error: {}", error),
-                )
-            }),
-        )
         // add a cookie "layer" (axum's way of customizing routing)
         .layer(CookieManagerLayer::new())
         // add the database "layer"
