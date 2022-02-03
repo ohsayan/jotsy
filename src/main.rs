@@ -61,6 +61,7 @@ async fn main() -> DynResult<()> {
             get(handlers::assets::index_login_css),
         )
         .route("/static/js/login.js", get(handlers::assets::index_login_js))
+        .route("/static/js/app.js", get(handlers::assets::index_app_js))
         .route("/signup", post(handlers::signup))
         .route("/signup", get(handlers::signup_get))
         .route("/logout", post(handlers::logout))

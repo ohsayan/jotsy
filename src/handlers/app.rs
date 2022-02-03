@@ -15,7 +15,7 @@
 */
 
 use crate::{
-    templates::{App, RedirectHome},
+    templates::{App, RedirectHome, SingleNote},
     util::resp,
 };
 use axum::{
@@ -87,14 +87,12 @@ pub async fn create_note(
         Err(e) => return e,
     };
     // now create the note
+    let note = Note::new(time, note.note);
     con.switch(crate::TABLE_NOTES).await.unwrap();
-    let json = serde_json::to_string(&Note::new(time, note.note)).unwrap();
+    let json = serde_json::to_string(&note).unwrap();
     let query = query!("LMOD", &username, "PUSH", json);
     match con.run_simple_query(&query).await {
-        Ok(Element::RespCode(RespCode::Okay)) => resp(
-            StatusCode::CREATED,
-            RedirectHome::new("Created note successfully"),
-        ),
+        Ok(Element::RespCode(RespCode::Okay)) => resp(StatusCode::CREATED, SingleNote::new(note)),
         Ok(_) => RedirectHome::re500(),
         Err(e) => {
             log::error!("Error while creating note: {e}");

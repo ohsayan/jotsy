@@ -76,6 +76,18 @@ impl SignupPage {
 }
 
 #[derive(Template)]
+#[template(path = "note.html")]
+pub struct SingleNote {
+    note: Note,
+}
+
+impl SingleNote {
+    pub fn new(note: Note) -> String {
+        Self { note }.render().unwrap()
+    }
+}
+
+#[derive(Template)]
 #[template(path = "app.html")]
 pub struct App {
     username: String,

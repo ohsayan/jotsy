@@ -49,11 +49,21 @@
           </p>
         </div>
         <div class="col-md-9">
-          <form
-            class="border border-primary p-2 rounded border-2 my-2"
-            action="/createnote"
-            method="post"
-          >
+          <div class="border border-primary p-2 rounded border-2 my-2">
+            <div
+              class="alert alert-danger alert-dismissible fade show"
+              role="alert"
+              id="newerror"
+              hidden
+            >
+              <span id="newerrormsg"></span>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close"
+              ></button>
+            </div>
             <div class="row mb-3">
               <div class="col-sm-10">
                 <textarea
@@ -64,22 +74,31 @@
                 ></textarea>
               </div>
             </div>
-            <button type="submit" class="btn btn-primary">Create note</button>
-          </form>
-          {% if notes.len() == 0 %}
-          <h1>You don't have any notes yet! Go ahead and write some!</h1>
-          {% else %} {% for note in notes %}
-          <div class="card">
-            <div class="card-body">
-              <h5 class="card-title" style="font-size: 0.9em">{{ note.date }}</h5>
-              <p class="card-text" style="font-size: 1.2em">{{ note.body }}</p>
-            </div>
+            <button class="btn btn-primary" onclick="submitAndUpdate();">
+              Create note
+            </button>
           </div>
-          {% endfor %} {% endif %}
+          <div id="notes">
+            {% if notes.len() == 0 %}
+            <h1>You don't have any notes yet! Go ahead and write some!</h1>
+            {% else %} {% for note in notes %}
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title" style="font-size: 0.9em">
+                  {{ note.date }}
+                </h5>
+                <p class="card-text" style="font-size: 1.2em">
+                  {{ note.body }}
+                </p>
+              </div>
+            </div>
+            {% endfor %} {% endif %}
+          </div>
         </div>
       </div>
     </div>
     <!-- Body -->
+    <script src="../static/js/app.js"></script>
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"

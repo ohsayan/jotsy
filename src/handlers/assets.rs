@@ -21,6 +21,7 @@ use axum::{
 
 const CSS_INDEX_LOGIN: &str = include_str!("../../static/css/login.css");
 const JS_INDEX_LOGIN: &str = include_str!("../../static/js/login.js");
+const JS_INDEX_APP: &str = include_str!("../../static/js/app.js");
 
 async fn asset(source: &'static str, ty: &'static str) -> impl IntoResponse {
     let mut headermap = HeaderMap::new();
@@ -42,4 +43,8 @@ pub async fn index_login_css() -> impl IntoResponse {
 
 pub async fn index_login_js() -> impl IntoResponse {
     js(JS_INDEX_LOGIN).await
+}
+
+pub async fn index_app_js() -> impl IntoResponse {
+    js(JS_INDEX_APP).await
 }
