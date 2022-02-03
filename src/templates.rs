@@ -64,3 +64,15 @@ impl SignupPage {
         Self { conflict }.render().unwrap()
     }
 }
+
+#[derive(Template)]
+#[template(path = "app.html")]
+pub struct App {
+    username: String,
+}
+
+impl App {
+    pub fn new(username: String) -> String {
+        Self { username }.render().unwrap()
+    }
+}

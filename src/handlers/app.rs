@@ -14,22 +14,10 @@
  * limitations under the License.
 */
 
-use crate::util::resp;
-use axum::{http::StatusCode, response::Html};
+use crate::{templates::App, util::resp};
+use axum::http::StatusCode;
 use skytable::pool::AsyncPool;
 
-pub async fn app(uname: String, _db: AsyncPool) -> (StatusCode, Html<String>) {
-    resp(
-        StatusCode::OK,
-        format!(
-            r#"
-            <html>
-            <h1>Hey, {uname}! Welcome to Jotsy &mdash; it's just around the corner</h1>
-            <form action="/logout" method="post">
-            <input type="submit" value="Click to Logout">
-            </form> 
-            </html>
-            "#
-        ),
-    )
+pub async fn app(uname: String, _db: AsyncPool) -> crate::RespTuple {
+    resp(StatusCode::OK, App::new(uname))
 }
