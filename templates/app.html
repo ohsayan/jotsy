@@ -45,16 +45,33 @@
         <div class="col-md-3">
           <h1>Welcome, <br />@{{ username }}!</h1>
           <p class="text-primary fs-4">
-            You've got {{ count }} notes on Jotsy.
+            You've got {{ count }} note(s) on Jotsy.
           </p>
         </div>
         <div class="col-md-9">
+          <form
+            class="border border-primary p-2 rounded border-2 my-2"
+            action="/createnote"
+            method="post"
+          >
+            <div class="row mb-3">
+              <div class="col-sm-10">
+                <textarea
+                  class="form-control"
+                  id="inputnote"
+                  name="note"
+                  placeholder="How have things been? Start jotsying your notes here ..."
+                ></textarea>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Create note</button>
+          </form>
           {% if notes.len() == 0 %}
           <h1>You don't have any notes yet! Go ahead and write some!</h1>
           {% else %} {% for note in notes %}
           <div class="card">
             <div class="card-body">
-              <h5 class="card-title" style="font-size: 1em">{{ note.date }}</h5>
+              <h5 class="card-title" style="font-size: 0.9em">{{ note.date }}</h5>
               <p class="card-text" style="font-size: 1.2em">{{ note.body }}</p>
             </div>
           </div>

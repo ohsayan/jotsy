@@ -32,7 +32,7 @@ use skytable::{
     RespCode,
 };
 
-pub async fn root(cookies: Cookies, Extension(db): Extension<AsyncPool>) -> crate::RespTuple {
+pub async fn root(mut cookies: Cookies, Extension(db): Extension<AsyncPool>) -> crate::RespTuple {
     // our database has hash(tokens) -> username
     // so we need to send the hash of the token and see if the returne value
     let mut con = match db.get().await {
@@ -42,13 +42,25 @@ pub async fn root(cookies: Cookies, Extension(db): Extension<AsyncPool>) -> crat
             return resp(StatusCode::INTERNAL_SERVER_ERROR, RedirectHome::e500());
         }
     };
+    let ret = verify_user_or_error(&mut con, &mut cookies).await;
+    drop(con);
+    match ret {
+        Ok(uname) => super::app::app(uname, db).await,
+        Err(e) => e,
+    }
+}
+
+pub(super) async fn verify_user_or_error(
+    con: &mut Connection,
+    cookies: &mut Cookies,
+) -> Result<String, crate::RespTuple> {
     con.switch(crate::TABLE_AUTH).await.unwrap();
     let username = cookies.get(COOKIE_USERNAME);
     let token = cookies.get(COOKIE_TOKEN);
     match (username, token) {
         (Some(uname), Some(token)) => {
             let (uname_v, token_v) = (uname.value().to_owned(), token.value().to_owned());
-            let verify_status = verify_user(&mut con, &uname_v, &token_v).await;
+            let verify_status = verify_user(con, &uname_v, &token_v).await;
             drop(con); // return con to the pool; also helps borrowck
             match verify_status {
                 VerifyStatus::No => {
@@ -56,18 +68,19 @@ pub async fn root(cookies: Cookies, Extension(db): Extension<AsyncPool>) -> crat
                     // bumping into these
                     cookies.remove(Cookie::new(COOKIE_USERNAME, uname_v));
                     cookies.remove(Cookie::new(COOKIE_TOKEN, token_v));
-                    resp(
+                    Err(resp(
                         StatusCode::UNAUTHORIZED,
                         RedirectHome::new("Found outdated or invalid cookies."),
-                    )
+                    ))
                 }
-                VerifyStatus::Yes => super::app::app(uname_v, db).await,
-                VerifyStatus::ServerError => {
-                    resp(StatusCode::INTERNAL_SERVER_ERROR, RedirectHome::e500())
-                }
+                VerifyStatus::Yes => Ok(uname.value().to_string()),
+                VerifyStatus::ServerError => Err(resp(
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    RedirectHome::e500(),
+                )),
             }
         }
-        _ => resp(StatusCode::OK, LoginPage::new(false)),
+        _ => Err(resp(StatusCode::OK, LoginPage::new(false))),
     }
 }
 
