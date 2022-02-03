@@ -14,6 +14,7 @@
  * limitations under the License.
 */
 
+use crate::handlers::app::Note;
 use askama::Template;
 
 pub const CSS_INDEX_LOGIN: &str = include_str!("../static/css/login.css");
@@ -69,10 +70,18 @@ impl SignupPage {
 #[template(path = "app.html")]
 pub struct App {
     username: String,
+    count: usize,
+    notes: Vec<Note>,
 }
 
 impl App {
-    pub fn new(username: String) -> String {
-        Self { username }.render().unwrap()
+    pub fn new(username: String, notes: Vec<Note>) -> String {
+        Self {
+            username,
+            count: notes.len(),
+            notes,
+        }
+        .render()
+        .unwrap()
     }
 }

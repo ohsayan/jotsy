@@ -24,7 +24,7 @@ use axum::{
     response::Html,
 };
 use serde::Deserialize;
-use skytable::{actions::AsyncActions, ddl::AsyncDdl, pool::AsyncPool};
+use skytable::{actions::AsyncActions, ddl::AsyncDdl, pool::AsyncPool, query, Element, RespCode};
 use tower_cookies::Cookies;
 
 #[derive(Deserialize)]
@@ -64,7 +64,18 @@ pub async fn signup(
         Ok(created_new) if created_new => {
             // cool, we did well
             log::info!("New user `{uname}` created.", uname = data.username);
-            super::login::authenticate(data.username, &mut cookies, &mut con).await
+            let ret =
+                super::login::authenticate(data.username.clone(), &mut cookies, &mut con).await;
+            con.switch(crate::TABLE_NOTES).await.unwrap();
+            // attempt to create an empty list
+            let query = query!("LSET", data.username);
+            if let Ok(Element::RespCode(RespCode::Okay | RespCode::OverwriteError)) =
+                con.run_simple_query(&query).await
+            {
+                ret
+            } else {
+                resp(StatusCode::INTERNAL_SERVER_ERROR, RedirectHome::e500())
+            }
         }
         Ok(_) => {
             // nope, username is taken

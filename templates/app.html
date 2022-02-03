@@ -40,13 +40,25 @@
     </nav>
     <!-- Navbar-->
     <!-- Body -->
-    <div class="container my-2">
+    <div class="container p-3">
       <div class="row">
         <div class="col-md-3">
           <h1>Welcome, <br />@{{ username }}!</h1>
+          <p class="text-primary fs-4">
+            You've got {{ count }} notes on Jotsy.
+          </p>
         </div>
         <div class="col-md-9">
-          <h1>Your notes will be <i>here</i>. We're on it 🚧</h1>
+          {% if notes.len() == 0 %}
+          <h1>You don't have any notes yet! Go ahead and write some!</h1>
+          {% else %} {% for note in notes %}
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title" style="font-size: 1em">{{ note.date }}</h5>
+              <p class="card-text" style="font-size: 1.2em">{{ note.body }}</p>
+            </div>
+          </div>
+          {% endfor %} {% endif %}
         </div>
       </div>
     </div>

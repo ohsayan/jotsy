@@ -14,10 +14,38 @@
  * limitations under the License.
 */
 
-use crate::{templates::App, util::resp};
+use crate::{
+    templates::{App, RedirectHome},
+    util::resp,
+};
 use axum::http::StatusCode;
-use skytable::pool::AsyncPool;
+use serde::{Deserialize, Serialize};
+use skytable::{ddl::AsyncDdl, pool::AsyncPool, query, types::Array, Element};
 
-pub async fn app(uname: String, _db: AsyncPool) -> crate::RespTuple {
-    resp(StatusCode::OK, App::new(uname))
+#[derive(Serialize, Deserialize)]
+pub struct Note {
+    pub date: String,
+    pub body: String,
+}
+
+pub async fn app(uname: String, db: AsyncPool) -> crate::RespTuple {
+    let mut con = match db.get().await {
+        Ok(c) => c,
+        Err(e) => {
+            log::error!("Failed to get connection from pool: {e}");
+            return resp(StatusCode::INTERNAL_SERVER_ERROR, RedirectHome::e500());
+        }
+    };
+    con.switch(crate::TABLE_NOTES).await.unwrap();
+    let query = query!("LGET", &uname);
+    let notes: Vec<Note> =
+        if let Element::Array(Array::Str(e)) = con.run_simple_query(&query).await.unwrap() {
+            e.into_iter()
+                .rev()
+                .filter_map(|v| v.map(|v| serde_json::from_str(&v).unwrap()))
+                .collect()
+        } else {
+            return resp(StatusCode::INTERNAL_SERVER_ERROR, RedirectHome::e500());
+        };
+    resp(StatusCode::OK, App::new(uname, notes))
 }

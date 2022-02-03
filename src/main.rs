@@ -31,6 +31,7 @@ mod util;
 const JOTSY_BIND_HOST: IpAddr = IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1));
 const JOTSY_BIND_PORT: u16 = 2022;
 const TABLE_AUTH: &str = "default:jotsyauth";
+const TABLE_NOTES: &str = "default:jotsynotes";
 
 type DynResult<T> = Result<T, Box<dyn std::error::Error>>;
 type RespTuple = (StatusCode, Html<String>);

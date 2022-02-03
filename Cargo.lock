@@ -551,6 +551,7 @@ dependencies = [
  "log",
  "rand",
  "serde",
+ "serde_json",
  "sha2",
  "skytable",
  "time 0.2.27",
