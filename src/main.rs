@@ -56,7 +56,11 @@ async fn main() -> DynResult<()> {
         .route("/createnote", post(handlers::app::create_note))
         .route("/login", post(handlers::login))
         .route("/login", get(handlers::login_get))
-        .route("/static/css/login.css", get(handlers::assets::index_login))
+        .route(
+            "/static/css/login.css",
+            get(handlers::assets::index_login_css),
+        )
+        .route("/static/js/login.js", get(handlers::assets::index_login_js))
         .route("/signup", post(handlers::signup))
         .route("/signup", get(handlers::signup_get))
         .route("/logout", post(handlers::logout))

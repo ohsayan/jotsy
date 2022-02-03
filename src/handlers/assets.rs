@@ -14,18 +14,32 @@
  * limitations under the License.
 */
 
-use crate::templates;
 use axum::{
     http::header::{self, HeaderMap, HeaderValue},
     response::IntoResponse,
 };
 
-async fn css(source: &'static str) -> impl IntoResponse {
+const CSS_INDEX_LOGIN: &str = include_str!("../../static/css/login.css");
+const JS_INDEX_LOGIN: &str = include_str!("../../static/js/login.js");
+
+async fn asset(source: &'static str, ty: &'static str) -> impl IntoResponse {
     let mut headermap = HeaderMap::new();
-    headermap.insert(header::CONTENT_TYPE, HeaderValue::from_static("text/css"));
+    headermap.insert(header::CONTENT_TYPE, HeaderValue::from_static(ty));
     (headermap, source)
 }
 
-pub async fn index_login() -> impl IntoResponse {
-    css(templates::CSS_INDEX_LOGIN).await
+async fn css(source: &'static str) -> impl IntoResponse {
+    asset(source, "text/css").await
+}
+
+async fn js(source: &'static str) -> impl IntoResponse {
+    asset(source, "text/javascript").await
+}
+
+pub async fn index_login_css() -> impl IntoResponse {
+    css(CSS_INDEX_LOGIN).await
+}
+
+pub async fn index_login_js() -> impl IntoResponse {
+    js(JS_INDEX_LOGIN).await
 }
