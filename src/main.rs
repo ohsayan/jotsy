@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, Sayan Nandan <nandansayan@outlook.com>
+ * Copyright (c) 2022, Sayan Nandan <nandansayan@outlook.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
