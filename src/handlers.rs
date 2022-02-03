@@ -38,7 +38,7 @@ async fn redirect_home_if_cookie_set(cookies: Cookies, page: String) -> Html<Str
     if cookies.get(COOKIE_TOKEN).is_some() || cookies.get(COOKIE_USERNAME).is_some() {
         // someone set the cookies but still ended up here, so redirect them to root to handle
         // the login cookie state
-        return Html::from(RedirectHome::new(""));
+        return Html::from(RedirectHome::empty());
     } else {
         Html::from(page)
     }

@@ -3,8 +3,21 @@
   <head>
     <title>Redirecting</title>
     <meta http-equiv="refresh" content="1; url = /" />
+    <style>
+      .centered {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+    </style>
   </head>
-  <body>
-    <p>{{ message }} Redirecting you to the homepage ...</p>
+  <body class="centered">
+    <p style="text-align: center;">
+    {% if message.len() != 0 %}
+    <h1>{{ message }}</h1>
+    {% endif %}
+    Redirecting you to the <a href="/">homepage</a>
+   </p>
   </body>
 </html>

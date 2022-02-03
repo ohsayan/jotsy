@@ -39,7 +39,7 @@ pub async fn root(mut cookies: Cookies, Extension(db): Extension<AsyncPool>) -> 
         Ok(c) => c,
         Err(e) => {
             log::error!("Failed to get connection from pool: {e}");
-            return resp(StatusCode::INTERNAL_SERVER_ERROR, RedirectHome::e500());
+            return RedirectHome::re500();
         }
     };
     let ret = verify_user_or_error(&mut con, &mut cookies).await;

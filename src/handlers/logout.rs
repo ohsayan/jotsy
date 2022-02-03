@@ -38,7 +38,7 @@ pub async fn logout(
         Ok(c) => c,
         Err(e) => {
             log::error!("Failed to get connection from pool: {e}");
-            return resp(StatusCode::INTERNAL_SERVER_ERROR, RedirectHome::e500());
+            return RedirectHome::re500();
         }
     };
     let c_user = cookies.get(super::COOKIE_USERNAME);

@@ -17,12 +17,12 @@
       <form id="signup-form" method="post" action="/signup">
         <h1 class="mb-4">Jotsy</h1>
         <h1 class="h3 mb-3 fw-normal">Get signed up.</h1>
-        {% if conflict %}
+        {% if error.is_some() %}
         <div
           class="alert alert-danger alert-dismissible fade show align-items-center"
           role="alert"
         >
-          That username is taken
+          {{ error.unwrap() }}
           <button
             type="button"
             class="btn-close"

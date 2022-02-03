@@ -44,7 +44,7 @@ pub async fn app(uname: String, db: AsyncPool) -> crate::RespTuple {
         Ok(c) => c,
         Err(e) => {
             log::error!("Failed to get connection from pool: {e}");
-            return resp(StatusCode::INTERNAL_SERVER_ERROR, RedirectHome::e500());
+            return RedirectHome::re500();
         }
     };
     con.switch(crate::TABLE_NOTES).await.unwrap();
@@ -57,7 +57,7 @@ pub async fn app(uname: String, db: AsyncPool) -> crate::RespTuple {
             .collect()
     } else {
         log::error!("Failed to LGET notes");
-        return resp(StatusCode::INTERNAL_SERVER_ERROR, RedirectHome::e500());
+        return RedirectHome::re500();
     };
     resp(StatusCode::OK, App::new(uname, notes))
 }
@@ -77,7 +77,7 @@ pub async fn create_note(
         Ok(c) => c,
         Err(e) => {
             log::error!("Failed to get connection from pool: {e}");
-            return resp(StatusCode::INTERNAL_SERVER_ERROR, RedirectHome::e500());
+            return RedirectHome::re500();
         }
     };
     // verify the user
@@ -95,10 +95,10 @@ pub async fn create_note(
             StatusCode::CREATED,
             RedirectHome::new("Created note successfully"),
         ),
-        Ok(_) => resp(StatusCode::INTERNAL_SERVER_ERROR, RedirectHome::e500()),
+        Ok(_) => RedirectHome::re500(),
         Err(e) => {
             log::error!("Error while creating note: {e}");
-            resp(StatusCode::INTERNAL_SERVER_ERROR, RedirectHome::e500())
+            RedirectHome::re500()
         }
     }
 }

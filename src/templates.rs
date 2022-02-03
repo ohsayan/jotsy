@@ -15,7 +15,9 @@
 */
 
 use crate::handlers::app::Note;
+use crate::util;
 use askama::Template;
+use axum::http::StatusCode;
 
 #[derive(Template)]
 #[template(path = "login.html")]
@@ -44,23 +46,32 @@ impl RedirectHome {
         .unwrap()
     }
     pub fn e500() -> String {
-        RedirectHome {
-            message: "An internal server error occurred.".to_owned(),
-        }
-        .render()
-        .unwrap()
+        Self::new("An internal server error occurred")
+    }
+    pub fn re500() -> crate::RespTuple {
+        util::resp(StatusCode::INTERNAL_SERVER_ERROR, Self::e500())
+    }
+    pub fn empty() -> String {
+        Self::new("")
     }
 }
 
 #[derive(Template)]
 #[template(path = "signup.html")]
 pub struct SignupPage {
-    conflict: bool,
+    error: Option<&'static str>,
 }
 
 impl SignupPage {
-    pub fn new(conflict: bool) -> String {
-        Self { conflict }.render().unwrap()
+    pub fn new(message: &'static str) -> String {
+        Self {
+            error: Some(message),
+        }
+        .render()
+        .unwrap()
+    }
+    pub fn empty() -> String {
+        Self { error: None }.render().unwrap()
     }
 }
 

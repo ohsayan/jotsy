@@ -35,7 +35,7 @@ pub struct SignupForm {
 }
 
 pub async fn signup_get(cookies: Cookies) -> Html<String> {
-    super::redirect_home_if_cookie_set(cookies, SignupPage::new(false)).await
+    super::redirect_home_if_cookie_set(cookies, SignupPage::empty()).await
 }
 
 pub async fn signup(
@@ -51,12 +51,38 @@ pub async fn signup(
         b. If this succeeds, username is available and we've created an user
     3. Now call super::login::authenticate(username, &mut cookies, &mut connection)
     */
+    // do a double check on the data; never trust the client
+    if data.username.len() < 6 {
+        return resp(
+            StatusCode::UNPROCESSABLE_ENTITY,
+            SignupPage::new("Username must have atleast 6 letters"),
+        );
+    }
+    if data.username.chars().any(|ch| !ch.is_ascii_alphanumeric()) {
+        // some funky chars in the username; let's prevent that
+        return resp(
+            StatusCode::UNPROCESSABLE_ENTITY,
+            SignupPage::new("Username can only have alphanumeric characters"),
+        );
+    }
+    if data.password != data.vpassword {
+        return resp(
+            StatusCode::UNPROCESSABLE_ENTITY,
+            SignupPage::new("The passwords do not match"),
+        );
+    }
+    if data.password.len() < 8 {
+        return resp(
+            StatusCode::UNPROCESSABLE_ENTITY,
+            SignupPage::new("Passwords must have atleast 8 characters"),
+        );
+    }
     let hash = util::bcrypt_hash(&data.password);
     let mut con = match db.get().await {
         Ok(c) => c,
         Err(e) => {
             log::error!("Failed to get connection from pool: {e}");
-            return resp(StatusCode::INTERNAL_SERVER_ERROR, RedirectHome::e500());
+            return RedirectHome::re500();
         }
     };
     con.switch(crate::TABLE_AUTH).await.unwrap();
@@ -74,17 +100,20 @@ pub async fn signup(
             {
                 ret
             } else {
-                resp(StatusCode::INTERNAL_SERVER_ERROR, RedirectHome::e500())
+                RedirectHome::re500()
             }
         }
         Ok(_) => {
             // nope, username is taken
-            resp(StatusCode::CONFLICT, SignupPage::new(true))
+            resp(
+                StatusCode::CONFLICT,
+                SignupPage::new("Sorry, that username is taken"),
+            )
         }
         Err(e) => {
             // server error
             log::error!("Failed to create user: {e}");
-            resp(StatusCode::INTERNAL_SERVER_ERROR, RedirectHome::e500())
+            RedirectHome::re500()
         }
     }
 }

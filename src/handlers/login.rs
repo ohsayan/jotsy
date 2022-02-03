@@ -82,7 +82,7 @@ pub async fn login(
         Ok(c) => c,
         Err(e) => {
             log::error!("Failed to get connection from pool: {e}");
-            return resp(StatusCode::INTERNAL_SERVER_ERROR, RedirectHome::e500());
+            return RedirectHome::re500();
         }
     };
     con.switch(crate::TABLE_AUTH).await.unwrap();
@@ -100,7 +100,7 @@ pub async fn login(
         }
         Err(e) => {
             log::error!("Failed to log user in: {}", e);
-            resp(StatusCode::INTERNAL_SERVER_ERROR, RedirectHome::e500())
+            RedirectHome::re500()
         }
     }
 }
