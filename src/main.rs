@@ -53,6 +53,11 @@ async fn main() -> DynResult<()> {
     env_logger::Builder::new()
         .parse_filters(&env::var("JOTSY_LOG").unwrap_or_else(|_| "info".to_owned()))
         .init();
+    log::trace!(
+        "Establishing connection to Skytable on: {}:{}",
+        sky_host,
+        sky_port
+    );
     // get our skytable instance
     let pool = pool::get_async(sky_host, sky_port, 10).await?;
     log::trace!("Connected to Skytable pool");

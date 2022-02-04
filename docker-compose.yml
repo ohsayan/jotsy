@@ -13,5 +13,6 @@ services:
     environment:
       - JOTSY_SKY_HOST=db
       - JOTSY_SKY_PORT=2003
+      - JOTSY_LOG=trace
     ports:
       - "2022:2022"
