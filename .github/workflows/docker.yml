@@ -1,4 +1,4 @@
-name: Test and release
+name: Publish docker image
 on:
   push:
     branches:
@@ -13,11 +13,7 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-      - name: Cargo test
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-      - name: Release build
+      - name: Build (optimized)
         uses: actions-rs/cargo@v1
         with:
           command: build
