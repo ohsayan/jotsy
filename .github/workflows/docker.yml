@@ -19,7 +19,7 @@ jobs:
           command: build
           args: --release
       - name: Build image
-        run: docker build -t jotsy
+        run: docker build -t jotsy .
       - name: Push to Docker Hub
         uses: docker/build-push-action@v1
         with:
