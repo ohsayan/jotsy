@@ -39,6 +39,8 @@ const TABLE_AUTH: &str = "default:jotsyauth";
 const TABLE_NOTES: &str = "default:jotsynotes";
 const ENV_SKY_HOST: &str = "JOTSY_SKY_HOST";
 const ENV_SKY_PORT: &str = "JOTSY_SKY_PORT";
+const ENV_JOTSY_HOST: &str = "JOTSY_HOST";
+const ENV_JOTSY_PORT: &str = "JOTSY_PORT";
 
 type DynResult<T> = Result<T, Box<dyn std::error::Error>>;
 type RespTuple = (StatusCode, Html<String>);
@@ -49,6 +51,12 @@ async fn main() -> DynResult<()> {
     let sky_port = env::var(ENV_SKY_PORT)
         .map(|p| p.parse())
         .unwrap_or(Ok(JOTSY_SKY_PORT))?;
+    let jotsy_host = env::var(ENV_JOTSY_HOST)
+        .map(|v| v.parse())
+        .unwrap_or(Ok(JOTSY_BIND_HOST))?;
+    let jotsy_port = env::var(ENV_JOTSY_PORT)
+        .map(|v| v.parse())
+        .unwrap_or(Ok(JOTSY_BIND_PORT))?;
     // configure our logger
     env_logger::Builder::new()
         .parse_filters(&env::var("JOTSY_LOG").unwrap_or_else(|_| "info".to_owned()))
@@ -64,7 +72,7 @@ async fn main() -> DynResult<()> {
     util::create_tables(&pool).await?;
     log::trace!("Created/reinitialized tables");
     // this is our host:port
-    let addr = SocketAddr::new(JOTSY_BIND_HOST, JOTSY_BIND_PORT);
+    let addr = SocketAddr::new(jotsy_host, jotsy_port);
     // create the routes
     let router = Router::new()
         // this is our GET for /

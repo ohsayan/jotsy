@@ -1,18 +1,27 @@
 version: "3.9"
 services:
-  db:
+  skydb:
     image: skytable/sdb:latest
     ports:
       - "2003:2003"
     volumes:
       - ./jotsy/skytable:/var/lib/skytable
+    networks:
+      - jotsy
+    command: skyd --noart -h 0.0.0.0 -p 2003
   app:
     image: ohsayan/jotsy:latest
     depends_on:
-      - db
+      - skydb
     environment:
-      - JOTSY_SKY_HOST=db
+      - JOTSY_HOST=0.0.0.0
+      - JOTSY_PORT=2022
+      - JOTSY_SKY_HOST=skydb
       - JOTSY_SKY_PORT=2003
       - JOTSY_LOG=trace
     ports:
       - "2022:2022"
+    networks:
+      - jotsy
+networks:
+  jotsy:
