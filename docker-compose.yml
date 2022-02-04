@@ -3,7 +3,7 @@ services:
   skydb:
     image: skytable/sdb:latest
     ports:
-      - "2003:2003"
+      - "127.0.0.1:2003:2003"
     volumes:
       - ./jotsy/skytable:/var/lib/skytable
     networks:
@@ -19,7 +19,7 @@ services:
       - JOTSY_SKY_HOST=skydb
       - JOTSY_SKY_PORT=2003
     ports:
-      - "2022:2022"
+      - "127.0.0.1:2022:2022"
     networks:
       - jotsy
 networks:

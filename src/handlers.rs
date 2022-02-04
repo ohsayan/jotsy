@@ -19,7 +19,7 @@ pub mod assets;
 mod login;
 mod logout;
 mod root;
-mod signup;
+pub mod signup;
 
 pub use self::{
     login::{login, login_get},

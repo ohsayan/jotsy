@@ -117,3 +117,10 @@ pub async fn signup(
         }
     }
 }
+
+pub async fn no_signup() -> crate::RespTuple {
+    resp(
+        StatusCode::BAD_REQUEST,
+        RedirectHome::new("Signups are currently disabled on this Jotsy instance"),
+    )
+}

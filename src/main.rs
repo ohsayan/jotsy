@@ -41,6 +41,7 @@ const ENV_SKY_HOST: &str = "JOTSY_SKY_HOST";
 const ENV_SKY_PORT: &str = "JOTSY_SKY_PORT";
 const ENV_JOTSY_HOST: &str = "JOTSY_HOST";
 const ENV_JOTSY_PORT: &str = "JOTSY_PORT";
+const ENV_JOTSY_SIGNUP_ENABLED: &str = "JOTSY_SIGNUP_ENABLED";
 
 type DynResult<T> = Result<T, Box<dyn std::error::Error>>;
 type RespTuple = (StatusCode, Html<String>);
@@ -57,6 +58,9 @@ async fn main() -> DynResult<()> {
     let jotsy_port = env::var(ENV_JOTSY_PORT)
         .map(|v| v.parse())
         .unwrap_or(Ok(JOTSY_BIND_PORT))?;
+    let jotsy_signup_enabled = env::var(ENV_JOTSY_SIGNUP_ENABLED)
+        .map(|v| v.parse())
+        .unwrap_or(Ok(true))?;
     // configure our logger
     env_logger::Builder::new()
         .parse_filters(&env::var("JOTSY_LOG").unwrap_or_else(|_| "info".to_owned()))
@@ -74,7 +78,7 @@ async fn main() -> DynResult<()> {
     // this is our host:port
     let addr = SocketAddr::new(jotsy_host, jotsy_port);
     // create the routes
-    let router = Router::new()
+    let mut router = Router::new()
         // this is our GET for /
         .route("/", get(handlers::root))
         .route("/createnote", post(handlers::app::create_note))
@@ -86,13 +90,19 @@ async fn main() -> DynResult<()> {
         )
         .route("/static/js/login.js", get(handlers::assets::index_login_js))
         .route("/static/js/app.js", get(handlers::assets::index_app_js))
-        .route("/signup", post(handlers::signup))
-        .route("/signup", get(handlers::signup_get))
+        .route("/favicon.ico", get(handlers::assets::favicon))
         .route("/logout", post(handlers::logout))
         // add a cookie "layer" (axum's way of customizing routing)
         .layer(CookieManagerLayer::new())
         // add the database "layer"
         .layer(AddExtensionLayer::new(pool));
+    if jotsy_signup_enabled {
+        router = router
+            .route("/signup", post(handlers::signup))
+            .route("/signup", get(handlers::signup_get));
+    } else {
+        router = router.route("/signup", get(handlers::signup::no_signup))
+    }
     // now run the service
     log::info!("Running server on http://127.0.0.1:2022/");
     tokio::select! {

@@ -22,19 +22,20 @@ use axum::{
 const CSS_INDEX_LOGIN: &str = include_str!("../../static/css/login.css");
 const JS_INDEX_LOGIN: &str = include_str!("../../static/js/login.js");
 const JS_INDEX_APP: &str = include_str!("../../static/js/app.js");
+const IMG_FAVICON: &[u8] = include_bytes!("../../static/favicon.ico");
 
-async fn asset(source: &'static str, ty: &'static str) -> impl IntoResponse {
+async fn asset(source: &'static [u8], ty: &'static str) -> impl IntoResponse {
     let mut headermap = HeaderMap::new();
     headermap.insert(header::CONTENT_TYPE, HeaderValue::from_static(ty));
     (headermap, source)
 }
 
 async fn css(source: &'static str) -> impl IntoResponse {
-    asset(source, "text/css").await
+    asset(source.as_bytes(), "text/css").await
 }
 
 async fn js(source: &'static str) -> impl IntoResponse {
-    asset(source, "text/javascript").await
+    asset(source.as_bytes(), "text/javascript").await
 }
 
 pub async fn index_login_css() -> impl IntoResponse {
@@ -47,4 +48,8 @@ pub async fn index_login_js() -> impl IntoResponse {
 
 pub async fn index_app_js() -> impl IntoResponse {
     js(JS_INDEX_APP).await
+}
+
+pub async fn favicon() -> impl IntoResponse {
+    asset(IMG_FAVICON, "image/x-icon").await
 }
