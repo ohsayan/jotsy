@@ -1,8 +1,8 @@
 # ✏️ Jotsy: Just your notes
 
-Jotsy is a self-hosted, free and open-source note taking app with a goal of simplicity in mind. It is powered by [Skytable](https://github.com/skytable/skytable).
+Jotsy is a self-hosted, free and open-source note taking app with a goal of simplicity in mind. It is powered by [Skytable](https://github.com/skytable/skytable). Read the [full blog post here](https://ohsayan.github.io/2022/02/jotsy-a-self-hosted-notes-app).
 
-> **🚧 NOTICE:** This is currently under development
+> 🚧 This is currently under development
 
 ## Features
 
@@ -36,6 +36,10 @@ Jotsy is a self-hosted, free and open-source note taking app with a goal of simp
   - Scripting: Pure JavaScript (uses AJAX)
   - Markup: Pure HTML
 
+## Contributing
+
+As highlighted in the original blog post, please create issues for any ideas you have; I want to hear them! Want to collaborate (would love some frontend wizard for some help :P)? Shoot me a [DM on Twitter](https://twitter.com/ohhsayan).
+
 ## License
 
-This web app is distributed under the [Apache-2.0 License](./LICENSE).
+This app is distributed under the [Apache-2.0 License](./LICENSE).
