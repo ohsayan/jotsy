@@ -21,7 +21,10 @@ use axum::{
     AddExtensionLayer, Router,
 };
 use skytable::pool;
-use std::net::{IpAddr, Ipv4Addr, SocketAddr};
+use std::{
+    env,
+    net::{IpAddr, Ipv4Addr, SocketAddr},
+};
 use tower_cookies::CookieManagerLayer;
 // modules
 mod handlers;
@@ -30,20 +33,28 @@ mod util;
 
 const JOTSY_BIND_HOST: IpAddr = IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1));
 const JOTSY_BIND_PORT: u16 = 2022;
+const JOTSY_SKY_HOST: &str = "127.0.0.1";
+const JOTSY_SKY_PORT: u16 = 2003;
 const TABLE_AUTH: &str = "default:jotsyauth";
 const TABLE_NOTES: &str = "default:jotsynotes";
+const ENV_SKY_HOST: &str = "JOTSY_SKY_HOST";
+const ENV_SKY_PORT: &str = "JOTSY_SKY_PORT";
 
 type DynResult<T> = Result<T, Box<dyn std::error::Error>>;
 type RespTuple = (StatusCode, Html<String>);
 
 #[tokio::main]
 async fn main() -> DynResult<()> {
+    let sky_host = env::var(ENV_SKY_HOST).unwrap_or(JOTSY_SKY_HOST.to_owned());
+    let sky_port = env::var(ENV_SKY_PORT)
+        .map(|p| p.parse())
+        .unwrap_or(Ok(JOTSY_SKY_PORT))?;
     // configure our logger
     env_logger::Builder::new()
-        .parse_filters(&std::env::var("JOTSY_LOG").unwrap_or_else(|_| "info".to_owned()))
+        .parse_filters(&env::var("JOTSY_LOG").unwrap_or_else(|_| "info".to_owned()))
         .init();
     // get our skytable instance
-    let pool = pool::get_async("127.0.0.1", 2003, 10).await?;
+    let pool = pool::get_async(sky_host, sky_port, 10).await?;
     log::trace!("Connected to Skytable pool");
     util::create_tables(&pool).await?;
     log::trace!("Created/reinitialized tables");
