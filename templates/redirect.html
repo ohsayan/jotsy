@@ -2,7 +2,9 @@
 <html>
   <head>
     <title>Redirecting</title>
+    {% if redirect %}
     <meta http-equiv="refresh" content="1; url = /" />
+    {% endif %}
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
       .centered {
@@ -18,7 +20,9 @@
     {% if message.len() != 0 %}
     <h1>{{ message }}</h1>
     {% endif %}
+    {% if redirect %}
     Redirecting you to the <a href="/">homepage</a>
+    {% endif %}
    </p>
   </body>
 </html>

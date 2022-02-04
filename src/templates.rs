@@ -33,26 +33,31 @@ impl LoginPage {
 
 #[derive(Template)]
 #[template(path = "redirect.html")]
-pub struct RedirectHome {
+pub struct NoticePage {
     message: String,
+    redirect: bool,
 }
 
-impl RedirectHome {
-    pub fn new(message: impl ToString) -> String {
-        RedirectHome {
+impl NoticePage {
+    pub fn new(message: impl ToString, redirect: bool) -> String {
+        NoticePage {
             message: message.to_string(),
+            redirect,
         }
         .render()
         .unwrap()
     }
+    pub fn new_redirect(message: impl ToString) -> String {
+        Self::new(message, true)
+    }
     pub fn e500() -> String {
-        Self::new("An internal server error occurred")
+        Self::new("An internal server error occurred", true)
     }
     pub fn re500() -> crate::RespTuple {
         util::resp(StatusCode::INTERNAL_SERVER_ERROR, Self::e500())
     }
     pub fn empty() -> String {
-        Self::new("")
+        Self::new("", true)
     }
 }
 

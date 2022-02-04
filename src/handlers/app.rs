@@ -15,7 +15,7 @@
 */
 
 use crate::{
-    templates::{App, RedirectHome, SingleNote},
+    templates::{App, NoticePage, SingleNote},
     util::resp,
 };
 use axum::{
@@ -44,7 +44,7 @@ pub async fn app(uname: String, db: AsyncPool) -> crate::RespTuple {
         Ok(c) => c,
         Err(e) => {
             log::error!("Failed to get connection from pool: {e}");
-            return RedirectHome::re500();
+            return NoticePage::re500();
         }
     };
     con.switch(crate::TABLE_NOTES).await.unwrap();
@@ -57,7 +57,7 @@ pub async fn app(uname: String, db: AsyncPool) -> crate::RespTuple {
             .collect()
     } else {
         log::error!("Failed to LGET notes");
-        return RedirectHome::re500();
+        return NoticePage::re500();
     };
     resp(StatusCode::OK, App::new(uname, notes))
 }
@@ -77,7 +77,7 @@ pub async fn create_note(
         Ok(c) => c,
         Err(e) => {
             log::error!("Failed to get connection from pool: {e}");
-            return RedirectHome::re500();
+            return NoticePage::re500();
         }
     };
     // verify the user
@@ -93,10 +93,10 @@ pub async fn create_note(
     let query = query!("LMOD", &username, "PUSH", json);
     match con.run_simple_query(&query).await {
         Ok(Element::RespCode(RespCode::Okay)) => resp(StatusCode::CREATED, SingleNote::new(note)),
-        Ok(_) => RedirectHome::re500(),
+        Ok(_) => NoticePage::re500(),
         Err(e) => {
             log::error!("Error while creating note: {e}");
-            RedirectHome::re500()
+            NoticePage::re500()
         }
     }
 }

@@ -19,7 +19,7 @@ use tower_cookies::{Cookie, Cookies};
 
 use super::{COOKIE_TOKEN, COOKIE_USERNAME};
 use crate::{
-    templates::{LoginPage, RedirectHome},
+    templates::{LoginPage, NoticePage},
     util::{self, resp},
 };
 
@@ -39,7 +39,7 @@ pub async fn root(mut cookies: Cookies, Extension(db): Extension<AsyncPool>) -> 
         Ok(c) => c,
         Err(e) => {
             log::error!("Failed to get connection from pool: {e}");
-            return RedirectHome::re500();
+            return NoticePage::re500();
         }
     };
     let ret = verify_user_or_error(&mut con, &mut cookies).await;
@@ -70,14 +70,13 @@ pub(super) async fn verify_user_or_error(
                     cookies.remove(Cookie::new(COOKIE_TOKEN, token_v));
                     Err(resp(
                         StatusCode::UNAUTHORIZED,
-                        RedirectHome::new("Found outdated or invalid cookies."),
+                        NoticePage::new_redirect("Found outdated or invalid cookies."),
                     ))
                 }
                 VerifyStatus::Yes => Ok(uname.value().to_string()),
-                VerifyStatus::ServerError => Err(resp(
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    RedirectHome::e500(),
-                )),
+                VerifyStatus::ServerError => {
+                    Err(resp(StatusCode::INTERNAL_SERVER_ERROR, NoticePage::e500()))
+                }
             }
         }
         _ => Err(resp(StatusCode::OK, LoginPage::new(false))),

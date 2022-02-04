@@ -15,7 +15,7 @@
 */
 
 use crate::{
-    templates::{RedirectHome, SignupPage},
+    templates::{NoticePage, SignupPage},
     util::{self, resp},
 };
 use axum::{
@@ -82,7 +82,7 @@ pub async fn signup(
         Ok(c) => c,
         Err(e) => {
             log::error!("Failed to get connection from pool: {e}");
-            return RedirectHome::re500();
+            return NoticePage::re500();
         }
     };
     con.switch(crate::TABLE_AUTH).await.unwrap();
@@ -100,7 +100,7 @@ pub async fn signup(
             {
                 ret
             } else {
-                RedirectHome::re500()
+                NoticePage::re500()
             }
         }
         Ok(_) => {
@@ -113,7 +113,7 @@ pub async fn signup(
         Err(e) => {
             // server error
             log::error!("Failed to create user: {e}");
-            RedirectHome::re500()
+            NoticePage::re500()
         }
     }
 }
@@ -121,6 +121,9 @@ pub async fn signup(
 pub async fn no_signup() -> crate::RespTuple {
     resp(
         StatusCode::BAD_REQUEST,
-        RedirectHome::new("Signups are currently disabled on this Jotsy instance"),
+        NoticePage::new(
+            "Signups are currently disabled on this Jotsy instance",
+            false,
+        ),
     )
 }

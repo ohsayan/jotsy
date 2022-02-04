@@ -16,7 +16,7 @@
 
 use super::{COOKIE_TOKEN, COOKIE_USERNAME};
 use crate::{
-    templates::{LoginPage, RedirectHome},
+    templates::{LoginPage, NoticePage},
     util::{self, create_cookie, resp},
 };
 use axum::{
@@ -61,7 +61,10 @@ pub(super) async fn authenticate(
     // now set cookies
     cookies.add(create_cookie(COOKIE_USERNAME, &uname));
     cookies.add(create_cookie(COOKIE_TOKEN, token));
-    resp(StatusCode::OK, RedirectHome::new("Logged in successfully."))
+    resp(
+        StatusCode::OK,
+        NoticePage::new_redirect("Logged in successfully."),
+    )
 }
 
 pub async fn login(
@@ -82,7 +85,7 @@ pub async fn login(
         Ok(c) => c,
         Err(e) => {
             log::error!("Failed to get connection from pool: {e}");
-            return RedirectHome::re500();
+            return NoticePage::re500();
         }
     };
     con.switch(crate::TABLE_AUTH).await.unwrap();
@@ -100,7 +103,7 @@ pub async fn login(
         }
         Err(e) => {
             log::error!("Failed to log user in: {}", e);
-            RedirectHome::re500()
+            NoticePage::re500()
         }
     }
 }

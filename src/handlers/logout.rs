@@ -15,7 +15,7 @@
 */
 
 use crate::{
-    templates::RedirectHome,
+    templates::NoticePage,
     util::{self, resp},
 };
 use axum::{
@@ -38,7 +38,7 @@ pub async fn logout(
         Ok(c) => c,
         Err(e) => {
             log::error!("Failed to get connection from pool: {e}");
-            return RedirectHome::re500();
+            return NoticePage::re500();
         }
     };
     let c_user = cookies.get(super::COOKIE_USERNAME);
@@ -54,7 +54,7 @@ pub async fn logout(
             cookies.remove(Cookie::new(super::COOKIE_TOKEN, token));
             resp(
                 StatusCode::OK,
-                RedirectHome::new("Logged out successfully."),
+                NoticePage::new_redirect("Logged out successfully."),
             )
         }
         (Some(cookie), None) | (None, Some(cookie)) => {
@@ -63,12 +63,12 @@ pub async fn logout(
             cookies.remove(Cookie::new(c_key, c_v));
             resp(
                 StatusCode::OK,
-                RedirectHome::new("Invalid cookies detected and removed."),
+                NoticePage::new_redirect("Invalid cookies detected and removed."),
             )
         }
         (None, None) => resp(
             StatusCode::NOT_ACCEPTABLE,
-            RedirectHome::new("Unexpected request to /logout"),
+            NoticePage::new_redirect("Unexpected request to /logout"),
         ),
     }
 }
