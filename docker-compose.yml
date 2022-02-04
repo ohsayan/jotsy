@@ -2,10 +2,6 @@ version: "3.9"
 services:
   db:
     image: skytable/sdb:latest
-    environment:
-      - SKY_SYSTEM_HOST=127.0.0.1
-      - SKY_SYSTEM_PORT=2003
-      - SKY_SYSTEM_NOART=true
     ports:
       - "2003:2003"
     volumes:
