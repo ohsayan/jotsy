@@ -91,11 +91,7 @@ async fn main() -> DynResult<()> {
         .route("/static/js/login.js", get(handlers::assets::index_login_js))
         .route("/static/js/app.js", get(handlers::assets::index_app_js))
         .route("/favicon.ico", get(handlers::assets::favicon))
-        .route("/logout", post(handlers::logout))
-        // add a cookie "layer" (axum's way of customizing routing)
-        .layer(CookieManagerLayer::new())
-        // add the database "layer"
-        .layer(AddExtensionLayer::new(pool));
+        .route("/logout", post(handlers::logout));
     if jotsy_signup_enabled {
         router = router
             .route("/signup", post(handlers::signup))
@@ -103,6 +99,11 @@ async fn main() -> DynResult<()> {
     } else {
         router = router.route("/signup", get(handlers::signup::no_signup))
     }
+    router = router
+        // add a cookie "layer" (axum's way of customizing routing)
+        .layer(CookieManagerLayer::new())
+        // add the database "layer"
+        .layer(AddExtensionLayer::new(pool));
     // now run the service
     log::info!("Running server on http://127.0.0.1:2022/");
     tokio::select! {

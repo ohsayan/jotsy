@@ -45,24 +45,18 @@
         <div class="col-md-3">
           <h1>Welcome, <br />@{{ username }}!</h1>
           <p class="text-primary fs-4">
-            You've got {{ count }} note(s) on Jotsy.
+            You've got <span id="count">{{ count }}</span> note(s) on Jotsy.
           </p>
         </div>
         <div class="col-md-9">
           <div class="border border-primary p-2 rounded border-2 my-2">
             <div
-              class="alert alert-danger alert-dismissible fade show"
+              class="alert alert-danger"
               role="alert"
               id="newerror"
               hidden
             >
               <span id="newerrormsg"></span>
-              <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="alert"
-                aria-label="Close"
-              ></button>
             </div>
             <div class="row mb-3">
               <div class="col-sm-10">
@@ -80,7 +74,11 @@
           </div>
           <div id="notes">
             {% if notes.len() == 0 %}
-            <h1>You don't have any notes yet! Go ahead and write some!</h1>
+            <p>
+              <h1 id="nonewnotes">
+              You don't have any notes yet! Go ahead and write some!
+              </h1>
+            </p>
             {% else %} {% for note in notes %}
             <div class="card">
               <div class="card-body">

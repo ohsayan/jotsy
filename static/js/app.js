@@ -2,6 +2,7 @@ const notesBody = document.getElementById("notes");
 const notesData = document.getElementById("inputnote");
 const noteError = document.getElementById("newerror");
 const noteErrorMessage = document.getElementById("newerrormsg");
+const noteCount = document.getElementById("count");
 
 function send(data) {
   const XHR = new XMLHttpRequest();
@@ -22,6 +23,13 @@ function send(data) {
     if (XHR.readyState == XMLHttpRequest.DONE) {
       if (XHR.status === 201) {
         notesBody.innerHTML = XHR.responseText + notesBody.innerHTML;
+        if (document.getElementById("nonewnotes") != null) {
+          document.getElementById("nonewnotes").remove();
+        }
+        var n = parseInt(noteCount.textContent);
+        n += 1;
+        noteCount.textContent = n.toString();
+        notesData.value = "";
       } else {
         noteError.hidden = false;
         noteErrorMessage.innerText = "Failed to submit new note";
@@ -32,7 +40,7 @@ function send(data) {
 
 function submitAndUpdate() {
   var note = notesData.value;
-  if (note.length == 0) {
+  if (note.length === 0) {
     noteError.hidden = false;
     noteErrorMessage.innerText = "Note cannot be empty!";
   } else {
