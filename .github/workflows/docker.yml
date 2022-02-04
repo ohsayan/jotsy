@@ -6,7 +6,7 @@ on:
     tags:
       - "v*"
 jobs:
-  test:
+  publish:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
