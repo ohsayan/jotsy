@@ -18,7 +18,6 @@ services:
       - JOTSY_PORT=2022
       - JOTSY_SKY_HOST=skydb
       - JOTSY_SKY_PORT=2003
-      - JOTSY_LOG=trace
     ports:
       - "2022:2022"
     networks:
