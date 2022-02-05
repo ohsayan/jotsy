@@ -26,3 +26,37 @@
     transform: rotate(360deg);
   }
 }
+code {
+  background-color: #f1f1f1;
+  padding: 0.1em 0.2em;
+}
+
+pre {
+  background-color: #ececec;
+  line-height: 1.4;
+  overflow-x: auto;
+  padding: 1em;
+}
+
+a code:hover {
+  color: black;
+  background: var(--hovercolor);
+}
+
+.highlight pre ::selection {
+  background: lightgray;
+  color: inherit;
+}
+
+pre code {
+  background-color: transparent;
+  color: inherit;
+  font-size: 100%;
+  padding: 0;
+}
+
+@media screen and (min-width: 600px) {
+  pre code {
+    font-size: 1.1em;
+  }
+}
