@@ -36,13 +36,14 @@
           <input
             type="text"
             class="form-control"
-            id="floatingInput"
+            id="username"
             name="username"
             placeholder="username"
-            minlength="6"
+            pattern="[a-zA-Z0-9]{6,}"
+            title="Minimum 6 alphanumeric characters"
             required
           />
-          <label for="floatingInput">Username</label>
+          <label for="username">Username</label>
         </div>
         <div class="form-floating">
           <input
@@ -51,7 +52,8 @@
             id="pass"
             placeholder="Password"
             name="password"
-            minlength="8"
+            pattern=".{8,}"
+            title="Minimum 8 characters"
             required
           />
           <label for="pass">Password</label>
@@ -63,7 +65,8 @@
             id="vpass"
             placeholder="Password"
             name="vpassword"
-            minlength="8"
+            pattern=".{8,}"
+            title="Minimum 8 characters"
             required
           />
           <label for="vpass">Verify password</label>
