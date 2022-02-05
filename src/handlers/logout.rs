@@ -24,7 +24,7 @@ use axum::{
 };
 use serde::Deserialize;
 use skytable::{actions::AsyncActions, pool::AsyncPool};
-use tower_cookies::{Cookie, Cookies};
+use tower_cookies::Cookies;
 
 #[derive(Deserialize)]
 pub struct Empty {}
@@ -50,8 +50,8 @@ pub async fn logout(
             // let's attempt to remove this
             let _ = con.del(util::sha2(&token)).await;
             // now remove these cookies
-            cookies.remove(Cookie::new(super::COOKIE_USERNAME, user));
-            cookies.remove(Cookie::new(super::COOKIE_TOKEN, token));
+            cookies.remove(util::create_cookie(super::COOKIE_USERNAME, user));
+            cookies.remove(util::create_cookie(super::COOKIE_TOKEN, token));
             resp(
                 StatusCode::OK,
                 NoticePage::new_redirect("Logged out successfully."),
@@ -60,7 +60,7 @@ pub async fn logout(
         (Some(cookie), None) | (None, Some(cookie)) => {
             let (c_key, c_v) = (cookie.name().to_owned(), cookie.value().to_owned());
             // random cookies, just pop them
-            cookies.remove(Cookie::new(c_key, c_v));
+            cookies.remove(util::create_cookie(c_key, c_v));
             resp(
                 StatusCode::OK,
                 NoticePage::new_redirect("Invalid cookies detected and removed."),

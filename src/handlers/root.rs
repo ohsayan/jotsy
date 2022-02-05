@@ -15,7 +15,7 @@
 */
 
 use axum::{extract::Extension, http::StatusCode};
-use tower_cookies::{Cookie, Cookies};
+use tower_cookies::Cookies;
 
 use super::{COOKIE_TOKEN, COOKIE_USERNAME};
 use crate::{
@@ -66,8 +66,8 @@ pub(super) async fn verify_user_or_error(
                 VerifyStatus::No => {
                     // auth failed, so we should remove these cookies; else we'll keep on
                     // bumping into these
-                    cookies.remove(Cookie::new(COOKIE_USERNAME, uname_v));
-                    cookies.remove(Cookie::new(COOKIE_TOKEN, token_v));
+                    cookies.remove(util::create_cookie(COOKIE_USERNAME, uname_v));
+                    cookies.remove(util::create_cookie(COOKIE_TOKEN, token_v));
                     Err(resp(
                         StatusCode::UNAUTHORIZED,
                         NoticePage::new_redirect("Found outdated or invalid cookies."),
