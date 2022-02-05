@@ -20,6 +20,7 @@ use axum::{
 };
 
 const CSS_INDEX_LOGIN: &str = include_str!("../../static/css/login.css");
+const CSS_INDEX_APP: &str = include_str!("../../static/css/app.css");
 const JS_INDEX_LOGIN: &str = include_str!("../../static/js/login.js");
 const JS_INDEX_APP: &str = include_str!("../../static/js/app.js");
 const IMG_FAVICON: &[u8] = include_bytes!("../../static/favicon.ico");
@@ -52,4 +53,8 @@ pub async fn index_app_js() -> impl IntoResponse {
 
 pub async fn favicon() -> impl IntoResponse {
     asset(IMG_FAVICON, "image/x-icon").await
+}
+
+pub async fn index_app_css() -> impl IntoResponse {
+    css(CSS_INDEX_APP).await
 }

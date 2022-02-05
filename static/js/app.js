@@ -4,6 +4,7 @@ const noteError = document.getElementById("newerror");
 const noteErrorMessage = document.getElementById("newerrormsg");
 const noteCount = document.getElementById("count");
 var lastNote = notesBody.getElementsByClassName("isnote")[0];
+const loader = document.getElementById("loader");
 
 function send(data) {
   const XHR = new XMLHttpRequest();
@@ -25,11 +26,16 @@ function send(data) {
       if (XHR.status === 201) {
         var element = document.createElement("span");
         element.innerHTML = XHR.responseText;
-        notesBody.insertBefore(element, lastNote);
+        if (lastNote == null) {
+          notesBody.appendChild(element);
+        } else {
+          notesBody.insertBefore(element, lastNote);
+        }
         lastNote = element;
         if (document.getElementById("nonewnotes") != null) {
           document.getElementById("nonewnotes").remove();
         }
+        loader.hidden = true;
         var n = parseInt(noteCount.textContent);
         n += 1;
         noteCount.textContent = n.toString();
@@ -50,6 +56,7 @@ function submitAndUpdate() {
   } else {
     // hide any previous error message
     noteError.hidden = true;
+    loader.hidden = false;
     send({ note: note });
   }
 }

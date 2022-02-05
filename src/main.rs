@@ -84,14 +84,16 @@ async fn main() -> DynResult<()> {
         .route("/createnote", post(handlers::app::create_note))
         .route("/login", post(handlers::login))
         .route("/login", get(handlers::login_get))
+        .route("/logout", post(handlers::logout))
+        // manually mount static assets
         .route(
             "/static/css/login.css",
             get(handlers::assets::index_login_css),
         )
+        .route("/static/css/app.css", get(handlers::assets::index_app_css))
         .route("/static/js/login.js", get(handlers::assets::index_login_js))
         .route("/static/js/app.js", get(handlers::assets::index_app_js))
-        .route("/favicon.ico", get(handlers::assets::favicon))
-        .route("/logout", post(handlers::logout));
+        .route("/favicon.ico", get(handlers::assets::favicon));
     if jotsy_signup_enabled {
         router = router
             .route("/signup", post(handlers::signup))
