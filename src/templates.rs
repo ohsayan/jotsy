@@ -81,19 +81,21 @@ impl SignupPage {
 }
 
 #[derive(Template)]
-#[template(path = "note.html")]
+#[template(path = "note.html", escape = "none")]
 pub struct SingleNote {
     note: Note,
 }
 
 impl SingleNote {
-    pub fn new(note: Note) -> String {
+    pub fn new(mut note: Note) -> String {
+        // update markdown
+        note.body = markdown::to_html(&note.body);
         Self { note }.render().unwrap()
     }
 }
 
 #[derive(Template)]
-#[template(path = "app.html")]
+#[template(path = "app.html", escape = "none")]
 pub struct App {
     username: String,
     count: usize,

@@ -25,12 +25,8 @@ function send(data) {
     if (XHR.readyState == XMLHttpRequest.DONE) {
       if (XHR.status === 201) {
         var element = document.createElement("span");
-        element.innerHTML = XHR.responseText;
-        if (lastNote == null) {
-          notesBody.appendChild(element);
-        } else {
-          notesBody.insertBefore(element, lastNote);
-        }
+        element.innerHTML = String(XHR.responseText);
+        notesBody.insertBefore(element, lastNote);
         lastNote = element;
         if (document.getElementById("nonewnotes") != null) {
           document.getElementById("nonewnotes").remove();
@@ -42,6 +38,7 @@ function send(data) {
         notesData.value = "";
       } else {
         noteError.hidden = false;
+        loader.hidden = true;
         noteErrorMessage.innerText = "Failed to submit new note";
       }
     }
