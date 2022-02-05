@@ -3,6 +3,7 @@ const notesData = document.getElementById("inputnote");
 const noteError = document.getElementById("newerror");
 const noteErrorMessage = document.getElementById("newerrormsg");
 const noteCount = document.getElementById("count");
+var lastNote = notesBody.getElementsByClassName("isnote")[0];
 
 function send(data) {
   const XHR = new XMLHttpRequest();
@@ -22,7 +23,11 @@ function send(data) {
   XHR.onreadystatechange = function () {
     if (XHR.readyState == XMLHttpRequest.DONE) {
       if (XHR.status === 201) {
-        notesBody.innerHTML = XHR.responseText + notesBody.innerHTML;
+        var transientBody = document.getElementById("notes");
+        var element = document.createElement("span");
+        element.innerHTML = XHR.responseText;
+        transientBody.insertBefore(element, lastNote);
+        lastNote = element;
         if (document.getElementById("nonewnotes") != null) {
           document.getElementById("nonewnotes").remove();
         }
