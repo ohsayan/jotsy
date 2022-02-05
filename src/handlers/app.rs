@@ -72,7 +72,7 @@ pub async fn create_note(
     Extension(db): Extension<AsyncPool>,
     Form(note): Form<FormNote>,
 ) -> crate::RespTuple {
-    let time = Local::now().format("%B %d, %Y | %I:%S %p").to_string();
+    let time = Local::now().format("%B %d, %Y | %I:%M %p").to_string();
     let mut con = match db.get().await {
         Ok(c) => c,
         Err(e) => {
