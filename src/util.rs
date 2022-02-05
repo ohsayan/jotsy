@@ -62,6 +62,7 @@ pub fn create_cookie(name: impl ToString, value: impl ToString) -> Cookie<'stati
     c.set_expires(now);
     c.set_same_site(SameSite::Strict);
     c.set_secure(true);
+    c.set_http_only(true);
     c
 }
 
