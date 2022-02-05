@@ -23,10 +23,9 @@ function send(data) {
   XHR.onreadystatechange = function () {
     if (XHR.readyState == XMLHttpRequest.DONE) {
       if (XHR.status === 201) {
-        var transientBody = document.getElementById("notes");
         var element = document.createElement("span");
         element.innerHTML = XHR.responseText;
-        transientBody.insertBefore(element, lastNote);
+        notesBody.insertBefore(element, lastNote);
         lastNote = element;
         if (document.getElementById("nonewnotes") != null) {
           document.getElementById("nonewnotes").remove();
