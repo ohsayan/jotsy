@@ -16,7 +16,7 @@ skytable = { version = "0.7.0-alpha.4", features = [
     "aio",
 ], default-features = false }
 # http
-cookie = "0.16.0"
+cookie = "0.15.1"
 tower-cookies = "0.4.1"
 # templating and ser/de
 askama = { version = "0.11.0" }

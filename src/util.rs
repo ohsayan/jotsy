@@ -15,6 +15,7 @@
 */
 
 use axum::{http::StatusCode, response::Html};
+use cookie::SameSite;
 use sha2::{Digest, Sha256};
 use skytable::pool::AsyncPool;
 use skytable::Query;
@@ -59,6 +60,9 @@ pub fn create_cookie(name: impl ToString, value: impl ToString) -> Cookie<'stati
     let mut now = OffsetDateTime::now();
     now += Duration::days(15);
     c.set_expires(now);
+    c.set_same_site(SameSite::Strict);
+    c.set_secure(true);
+    c.set_http_only(true);
     c
 }
 
