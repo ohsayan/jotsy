@@ -53,7 +53,13 @@ pub async fn app(uname: String, db: AsyncPool) -> crate::RespTuple {
     let notes: Vec<Note> = if let Element::Array(Array::Str(e)) = ret {
         e.into_iter()
             .rev()
-            .filter_map(|v| v.map(|v| serde_json::from_str(&v).unwrap()))
+            .filter_map(|v| {
+                v.map(|v| {
+                    let mut note: Note = serde_json::from_str(&v).unwrap();
+                    note.body = markdown::to_html(&note.body);
+                    note
+                })
+            })
             .collect()
     } else {
         log::error!("Failed to LGET notes");

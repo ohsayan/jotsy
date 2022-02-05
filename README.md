@@ -12,6 +12,7 @@ Jotsy is a self-hosted, free and open-source note taking app with a goal of simp
 
 - 🏢 Multi-user
 - ✍️ Effective and distraction free notemaking
+- 🖋 Plaintext or markdown
 - 🔐 Secure authentication and session management
 - 🌱 Extremely simple to self-host
 - 🌲 Extremely light on resources
