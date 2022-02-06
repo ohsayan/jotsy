@@ -14,6 +14,7 @@
  * limitations under the License.
 */
 
+pub mod account;
 pub mod app;
 pub mod assets;
 mod login;

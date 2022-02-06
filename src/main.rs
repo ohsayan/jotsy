@@ -64,6 +64,7 @@ async fn main() -> DynResult<()> {
         .route("/login", post(handlers::login))
         .route("/login", get(handlers::login_get))
         .route("/logout", post(handlers::logout))
+        .route("/account", get(handlers::account::account))
         // manually mount static assets
         .route(
             "/static/css/login.css",

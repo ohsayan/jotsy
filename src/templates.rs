@@ -119,3 +119,16 @@ impl App {
         .unwrap()
     }
 }
+
+#[derive(Template)]
+#[template(path = "account.html")]
+pub struct Account {
+    count: u64,
+    username: String,
+}
+
+impl Account {
+    pub fn new(count: u64, username: String) -> String {
+        Self { count, username }.render().unwrap()
+    }
+}
