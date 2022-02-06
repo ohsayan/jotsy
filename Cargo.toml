@@ -3,6 +3,10 @@ name = "jotsy"
 version = "0.1.0"
 edition = "2021"
 authors = ["Sayan Nandan <nandansayan@outlook.com>"]
+description = "Jotsy is a self-hosted, free and open-source notes app that focuses on simplicity"
+license = "Apache-2.0"
+repository = "https://github.com/ohsayan/jotsy"
+readme = "README.md"
 
 [dependencies]
 # networking
