@@ -56,7 +56,7 @@ pub async fn logout_core(
             let user = user.value().to_owned();
             let token = token.value().to_owned();
             // let's attempt to remove this
-            assert!(con.del(util::sha2(&token)).await? == 1);
+            con.del(util::sha2(&token)).await?;
             // now remove these cookies
             cookies.remove(util::create_cookie(super::COOKIE_USERNAME, user));
             cookies.remove(util::create_cookie(super::COOKIE_TOKEN, token));
