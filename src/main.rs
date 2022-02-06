@@ -51,6 +51,8 @@ async fn main() -> DynResult<()> {
     );
     // get our skytable instance
     let pool = pool::get_async(cfg.sky_host, cfg.sky_port, 10).await?;
+    // just attempt to get a connection
+    pool.get().await?;
     log::trace!("Connected to Skytable pool");
     util::create_tables(&pool).await?;
     log::trace!("Created/reinitialized tables");

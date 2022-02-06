@@ -20,7 +20,14 @@ use tower_cookies::Cookies;
 use super::{COOKIE_TOKEN, COOKIE_USERNAME};
 use crate::{error::ResponseError, templates::LoginPage, util};
 
-use skytable::{actions::AsyncActions, aio::Connection, ddl::AsyncDdl, pool::AsyncPool};
+use skytable::{
+    actions::AsyncActions,
+    aio::Connection,
+    ddl::AsyncDdl,
+    error::{Error, SkyhashError},
+    pool::AsyncPool,
+    RespCode,
+};
 
 pub async fn root(
     mut cookies: Cookies,
@@ -67,6 +74,11 @@ async fn verify_user<'a>(
     uname: &'a str,
     token: &'a str,
 ) -> crate::JotsyResponseResult<bool> {
-    let hash = util::sha2(token);
-    con.get(hash).await.map(|ret: String| Ok(ret.eq(uname)))?
+    let hash: String = util::sha2(token);
+    let x: Result<String, Error> = con.get(hash).await;
+    match x {
+        Ok(ret) => Ok(ret == uname),
+        Err(Error::SkyError(SkyhashError::Code(RespCode::NotFound))) => Ok(false),
+        Err(e) => Err(e.into()),
+    }
 }

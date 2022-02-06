@@ -51,7 +51,7 @@ impl NoticePage {
         Self::new(message, true)
     }
     pub fn e500() -> String {
-        Self::new("An internal server error occurred", true)
+        Self::new("An internal server error occurred", false)
     }
     pub fn e500_resp() -> Response {
         Response::builder()
