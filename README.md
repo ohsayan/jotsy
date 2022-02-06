@@ -28,6 +28,16 @@ Jotsy is a self-hosted, free and open-source note taking app with a goal of simp
    ```
 3. Open your browser and head to http://localhost:2022
 
+## Updating to the latest release
+
+To update to the latest release (don't worry, you won't lose any data), run this:
+
+```sh
+cd jotsy && sudo docker pull ohsayan/jotsy:latest && sudo docker-compose up -d
+```
+
+This will pull the latest Jotsy image, stop the existing instance, rebuild the container and start it up again.
+
 ## Stack
 
 - Backend:
