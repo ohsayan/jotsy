@@ -35,6 +35,7 @@ use tower_cookies::Cookies;
 const COOKIE_USERNAME: &str = "jotsy_user";
 const COOKIE_TOKEN: &str = "jotsy_token";
 
+/// This will redirect to `/` if no cookies are set, else it will return the provided page
 async fn redirect_home_if_cookie_set(cookies: Cookies, page: String) -> Html<String> {
     if cookies.get(COOKIE_TOKEN).is_some() || cookies.get(COOKIE_USERNAME).is_some() {
         // someone set the cookies but still ended up here, so redirect them to root to handle

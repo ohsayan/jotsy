@@ -32,29 +32,34 @@ use skytable::{
 use tower_cookies::Cookies;
 
 #[derive(Deserialize)]
+/// The sign up form
 pub struct SignupForm {
     username: String,
     password: String,
     vpassword: String,
 }
 
+/// `GET` for `/signup`
+/// If no cookies are set, simply return a fresh sign up page; else, reload `/` to trigger
+/// auth
 pub async fn signup_get(cookies: Cookies) -> Html<String> {
     super::redirect_home_if_cookie_set(cookies, SignupPage::empty()).await
 }
 
+/// `POST` for `/signup`
+///
+/// Signup flow:
+/// 1. Hash the password (TODO: report error if vpassword != password)
+/// 2. Now `set` username->hashed passowrd
+/// a. If this fails, username is taken
+/// b. If this succeeds, username is available and we've created an user
+/// 3. Now call super::login::authenticate(username, &mut cookies, &mut connection)
+///
 pub async fn signup(
     Form(data): Form<SignupForm>,
     mut cookies: Cookies,
     Extension(db): Extension<AsyncPool>,
 ) -> crate::JotsyResponse {
-    /*
-    Signup flow:
-    1. Hash the password (TODO: report error if vpassword != password)
-    2. Now `set` username->hashed passowrd
-        a. If this fails, username is taken
-        b. If this succeeds, username is available and we've created an user
-    3. Now call super::login::authenticate(username, &mut cookies, &mut connection)
-    */
     // do a double check on the data; never trust the client
     if data.username.len() < 6 {
         return resp(
@@ -117,6 +122,7 @@ pub async fn signup(
     }
 }
 
+/// `GET` for `/signup` for cases where signups are disabled
 pub async fn no_signup() -> crate::JotsyResponse {
     resp(
         StatusCode::BAD_REQUEST,

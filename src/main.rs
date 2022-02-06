@@ -60,7 +60,7 @@ async fn main() -> DynResult<()> {
     let mut router = Router::new()
         // this is our GET for /
         .route("/", get(handlers::root))
-        .route("/createnote", post(handlers::app::create_note))
+        .route("/create/note", post(handlers::app::create_note))
         .route("/login", post(handlers::login))
         .route("/login", get(handlers::login_get))
         .route("/logout", post(handlers::logout))

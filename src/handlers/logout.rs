@@ -25,6 +25,7 @@ use axum::{
 use skytable::{actions::AsyncActions, ddl::AsyncDdl, pool::AsyncPool};
 use tower_cookies::Cookies;
 
+/// `POST` for `/logout`
 pub async fn logout(
     Form(_): Form<Empty>,
     cookies: Cookies,
@@ -33,6 +34,14 @@ pub async fn logout(
     self::logout_core(cookies, "Logged out successfully", db).await
 }
 
+/// The main logic for a logout procedure. This will:
+/// - Get the cookies
+/// - Will attempt to remove hash(token) from the DB
+///     - If this succeeds, it will remove the cookies
+/// - If there are either of `username` or `token` cookies set, then remove them
+/// - If no cookies are set, it will simply return a NOT_ACCEPTABLE error because
+/// you aren't expected to `POST` to `/logout` without either
+/// - Redirects to `/`
 pub async fn logout_core(
     cookies: Cookies,
     redirect_message: &'static str,
@@ -47,7 +56,7 @@ pub async fn logout_core(
             let user = user.value().to_owned();
             let token = token.value().to_owned();
             // let's attempt to remove this
-            let _ = con.del(util::sha2(&token)).await;
+            assert!(con.del(util::sha2(&token)).await? == 1);
             // now remove these cookies
             cookies.remove(util::create_cookie(super::COOKIE_USERNAME, user));
             cookies.remove(util::create_cookie(super::COOKIE_TOKEN, token));

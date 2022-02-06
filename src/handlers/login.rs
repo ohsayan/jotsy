@@ -37,15 +37,26 @@ use skytable::{
 use tower_cookies::Cookies;
 
 #[derive(Deserialize)]
+/// The login form
 pub struct Login {
     username: String,
     password: String,
 }
 
+/// `GET` for `/login`
+/// If any cookies are set, it will reload `/` to trigger authentication, else it will
+/// return the login page
 pub async fn login_get(cookies: Cookies) -> Html<String> {
     super::redirect_home_if_cookie_set(cookies, LoginPage::new(false)).await
 }
 
+/// Authenticate an user. **You must ensure that the user is verified before authenticating
+/// them!**
+/// This will:
+/// - Generate a session token
+/// - Store the hash of the session token in the auth table
+/// - Set cookies `username` and `token` with a validity of 15 days
+/// - Redirect the user to root `/`
 pub(super) async fn authenticate(
     uname: String,
     cookies: &mut Cookies,
@@ -67,6 +78,11 @@ pub(super) async fn authenticate(
     )
 }
 
+/// `POST` for `/login`
+/// This will:
+/// - Attempt to verify the provided credentials
+/// - If they are valid, it will call `authenticate`
+/// - If not, it will return the login page with an error
 pub async fn login(
     mut cookies: Cookies,
     Extension(db): Extension<AsyncPool>,
@@ -106,6 +122,7 @@ const CHARSET: &[u8] =
     b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_=+[]{}\\|;:'\"<>./~";
 const TOKEN_LEN: usize = 32;
 
+/// Returns an authentication token
 fn generate_token() -> String {
     (0..TOKEN_LEN)
         .map(|_| {
