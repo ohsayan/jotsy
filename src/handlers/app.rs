@@ -28,6 +28,7 @@ use skytable::{ddl::AsyncDdl, pool::AsyncPool, query, types::Array, Element, Res
 use tower_cookies::Cookies;
 
 #[derive(Serialize, Deserialize)]
+/// A `Note`. This is stored as JSON in Skytable and is ser/de-d as required
 pub struct Note {
     pub date: String,
     pub body: String,
@@ -39,6 +40,7 @@ impl Note {
     }
 }
 
+/// Returns the main app page for an authenticated user
 pub async fn app(uname: String, db: AsyncPool) -> crate::JotsyResponse {
     let mut con = db.get().await?;
     con.switch(crate::TABLE_NOTES).await?;
@@ -63,10 +65,17 @@ pub async fn app(uname: String, db: AsyncPool) -> crate::JotsyResponse {
 }
 
 #[derive(Deserialize)]
+/// A note from the AJAX submission
 pub struct FormNote {
     note: String,
 }
 
+/// `POST` for `/create/note`
+///
+/// This will:
+/// - Verify the session
+/// - Create the note
+/// - Return a rendered note element
 pub async fn create_note(
     mut cookies: Cookies,
     Extension(db): Extension<AsyncPool>,

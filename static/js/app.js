@@ -17,7 +17,7 @@ function send(data) {
     );
   }
   encodedData = encodedDataPairs.join("&").replace(/%20/g, "+");
-  XHR.open("POST", "/createnote");
+  XHR.open("POST", "/create/note");
   XHR.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
   XHR.send(encodedData);
   var ret;

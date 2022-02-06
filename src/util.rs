@@ -16,6 +16,7 @@
 
 use axum::{http::StatusCode, response::Html};
 use cookie::SameSite;
+use serde::Deserialize;
 use sha2::{Digest, Sha256};
 use skytable::{pool::AsyncPool, Query};
 use time::{Duration, OffsetDateTime};
@@ -23,6 +24,9 @@ use tower_cookies::Cookie;
 
 const CREATE_JOTSY_TABLE_AUTH: &str = "create table default:jotsyauth keymap(binstr,binstr)";
 const CREATE_JOTSY_TABLE_NOTES: &str = "create table default:jotsynotes keymap(str,list<str>)";
+
+#[derive(Deserialize)]
+pub struct Empty {}
 
 pub fn query(q: &str) -> Query {
     let q: Vec<&str> = q.split_ascii_whitespace().collect();
@@ -62,7 +66,16 @@ pub fn create_cookie(name: impl ToString, value: impl ToString) -> Cookie<'stati
     c.set_same_site(SameSite::Strict);
     c.set_secure(true);
     c.set_http_only(true);
+    c.set_path("/");
     c
+}
+
+pub fn create_remove_cookie(cookie: &Cookie) -> Cookie<'static> {
+    let name = cookie.name();
+    let mut new_cookie =
+        Cookie::parse(format!("{name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT")).unwrap();
+    new_cookie.set_path("/");
+    new_cookie
 }
 
 pub fn bcrypt_hash(input: impl AsRef<[u8]>) -> String {
