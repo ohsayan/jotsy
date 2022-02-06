@@ -52,20 +52,20 @@ pub async fn logout_core(
     let c_token = cookies.get(super::COOKIE_TOKEN);
     con.switch(crate::TABLE_AUTH).await?;
     match (c_user, c_token) {
-        (Some(user), Some(token)) => {
-            let user = user.value().to_owned();
-            let token = token.value().to_owned();
+        (Some(user_c), Some(token_c)) => {
+            let token = token_c.value().to_owned();
             // let's attempt to remove this
-            con.del(util::sha2(&token)).await?;
+            let del = con.del(util::sha2(token)).await?;
             // now remove these cookies
-            cookies.remove(util::create_cookie(super::COOKIE_USERNAME, user));
-            cookies.remove(util::create_cookie(super::COOKIE_TOKEN, token));
+            if del == 1 {
+                cookies.remove(util::create_remove_cookie(&user_c));
+                cookies.remove(util::create_remove_cookie(&token_c));
+            }
             resp(StatusCode::OK, NoticePage::new_redirect(redirect_message))
         }
         (Some(cookie), None) | (None, Some(cookie)) => {
-            let (c_key, c_v) = (cookie.name().to_owned(), cookie.value().to_owned());
             // random cookies, just pop them
-            cookies.remove(util::create_cookie(c_key, c_v));
+            cookies.remove(util::create_remove_cookie(&cookie));
             resp(
                 StatusCode::OK,
                 NoticePage::new_redirect("Invalid cookies detected and removed."),

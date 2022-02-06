@@ -66,7 +66,16 @@ pub fn create_cookie(name: impl ToString, value: impl ToString) -> Cookie<'stati
     c.set_same_site(SameSite::Strict);
     c.set_secure(true);
     c.set_http_only(true);
+    c.set_path("/");
     c
+}
+
+pub fn create_remove_cookie(cookie: &Cookie) -> Cookie<'static> {
+    let name = cookie.name();
+    let mut new_cookie =
+        Cookie::parse(format!("{name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT")).unwrap();
+    new_cookie.set_path("/");
+    new_cookie
 }
 
 pub fn bcrypt_hash(input: impl AsRef<[u8]>) -> String {

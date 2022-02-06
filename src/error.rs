@@ -26,7 +26,6 @@ pub use skytable::{error::Error as SkytableError, pool::bb8Error};
 pub enum ResponseError {
     DatabaseError(SkytableError),
     PoolError(bb8Error<SkytableError>),
-    AppError(&'static str),
     /// This is a redirect, not an error. Just a hack to simplify things
     Redirect(String),
 }
@@ -42,10 +41,6 @@ impl IntoResponse for ResponseError {
                 log::error!("Failed to get connection from pool: {epool}");
                 NoticePage::e500_resp()
             }
-            Self::AppError(eapp) => Response::builder()
-                .status(StatusCode::INTERNAL_SERVER_ERROR)
-                .body(body::boxed(body::Full::from(NoticePage::new(eapp, true))))
-                .unwrap(),
             Self::Redirect(red) => Response::builder()
                 .status(StatusCode::OK)
                 .body(body::boxed(body::Full::from(red)))

@@ -18,7 +18,11 @@ use axum::extract::Extension;
 use tower_cookies::Cookies;
 
 use super::{COOKIE_TOKEN, COOKIE_USERNAME};
-use crate::{error::ResponseError, templates::LoginPage, util};
+use crate::{
+    error::ResponseError,
+    templates::{LoginPage, NoticePage},
+    util,
+};
 
 use skytable::{
     actions::AsyncActions,
@@ -67,11 +71,11 @@ pub(super) async fn verify_user_or_error(
             } else {
                 // auth failed, so we should remove these cookies; else we'll keep on
                 // bumping into these
-                cookies.remove(util::create_cookie(COOKIE_USERNAME, uname_v));
-                cookies.remove(util::create_cookie(COOKIE_TOKEN, token_v));
-                Err(ResponseError::AppError(
+                cookies.remove(util::create_remove_cookie(&uname));
+                cookies.remove(util::create_remove_cookie(&token));
+                Err(ResponseError::Redirect(NoticePage::new_redirect(
                     "Found invalid or outdated cookies.",
-                ))
+                )))
             }
         }
         _ => Err(ResponseError::Redirect(LoginPage::new(false))),
@@ -94,9 +98,15 @@ async fn verify_user<'a>(
 ) -> crate::JotsyResponseResult<bool> {
     con.switch(crate::TABLE_AUTH).await?;
     let hash: String = util::sha2(token);
-    let x: Result<String, Error> = con.get(hash).await;
+    let x: Result<String, Error> = con.get(&hash).await;
     match x {
-        Ok(ret) => Ok(ret == uname),
+        Ok(ret) if ret.eq(uname) => Ok(true),
+        Ok(_) => {
+            // so we got the uname but it's not equal to this? well, possibly the
+            // session was removed, so purge it (penalty for forge attempts :D)
+            con.del(hash).await?;
+            Ok(false)
+        }
         Err(Error::SkyError(SkyhashError::Code(RespCode::NotFound))) => Ok(false),
         Err(e) => Err(e.into()),
     }
