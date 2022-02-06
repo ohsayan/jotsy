@@ -132,3 +132,30 @@ impl Account {
         Self { count, username }.render().unwrap()
     }
 }
+
+#[derive(Template)]
+#[template(path = "delete.html")]
+pub struct DeleteUI {
+    what: String,
+    action: String,
+    username: String,
+    lose: String,
+}
+
+impl DeleteUI {
+    pub fn new(
+        what: impl ToString,
+        action: impl ToString,
+        username: impl ToString,
+        lose: impl ToString,
+    ) -> String {
+        Self {
+            what: what.to_string(),
+            action: action.to_string(),
+            username: username.to_string(),
+            lose: lose.to_string(),
+        }
+        .render()
+        .unwrap()
+    }
+}

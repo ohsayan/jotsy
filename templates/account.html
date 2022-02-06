@@ -30,7 +30,7 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <li class="nav-item">
-              <a class="nav-link" href="#">Home</a>
+              <a class="nav-link" href="/">Home</a>
             </li>
             <li class="nav-item">
               <a class="nav-link active" aria-current="page" href="/account"
@@ -56,30 +56,14 @@
             >.
             <br />
             Your username is <b>@{{ username }}</b>. You have
-            <b>{{ count }} notes</b> stored on Jotsy.
+            <b>{{ count }} note(s)</b> stored on Jotsy.
           </p>
-          <form
-            action="/clearnotes"
-            method="POST"
-            id="form-clear"
-            hidden
-          ></form>
-          <button
-            form="form-clear"
-            class="btn btn-outline-danger"
-            type="submit"
+          <a href="/delete/account"
+            ><button class="btn btn-danger">Delete my account</button></a
           >
-            Delete all notes
-          </button>
-          <form
-            action="/deleteaccount"
-            method="POST"
-            id="form-delete"
-            hidden
-          ></form>
-          <button class="btn btn-danger" form="form-delete" type="submit">
-            Delete my account
-          </button>
+          <a href="/delete/notes"
+            ><button class="btn btn-outline-danger">Delete all notes</button></a
+          >
         </div>
       </div>
     </div>

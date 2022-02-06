@@ -16,27 +16,32 @@
 
 use crate::{
     templates::NoticePage,
-    util::{self, resp},
+    util::{self, resp, Empty},
 };
 use axum::{
     extract::{Extension, Form},
     http::StatusCode,
 };
-use serde::Deserialize;
-use skytable::{actions::AsyncActions, pool::AsyncPool};
+use skytable::{actions::AsyncActions, ddl::AsyncDdl, pool::AsyncPool};
 use tower_cookies::Cookies;
-
-#[derive(Deserialize)]
-pub struct Empty {}
 
 pub async fn logout(
     Form(_): Form<Empty>,
     cookies: Cookies,
     Extension(db): Extension<AsyncPool>,
 ) -> crate::JotsyResponse {
+    self::logout_core(cookies, "Logged out successfully", db).await
+}
+
+pub async fn logout_core(
+    cookies: Cookies,
+    redirect_message: &'static str,
+    db: AsyncPool,
+) -> crate::JotsyResponse {
     let mut con = db.get().await?;
     let c_user = cookies.get(super::COOKIE_USERNAME);
     let c_token = cookies.get(super::COOKIE_TOKEN);
+    con.switch(crate::TABLE_AUTH).await?;
     match (c_user, c_token) {
         (Some(user), Some(token)) => {
             let user = user.value().to_owned();
@@ -46,10 +51,7 @@ pub async fn logout(
             // now remove these cookies
             cookies.remove(util::create_cookie(super::COOKIE_USERNAME, user));
             cookies.remove(util::create_cookie(super::COOKIE_TOKEN, token));
-            resp(
-                StatusCode::OK,
-                NoticePage::new_redirect("Logged out successfully."),
-            )
+            resp(StatusCode::OK, NoticePage::new_redirect(redirect_message))
         }
         (Some(cookie), None) | (None, Some(cookie)) => {
             let (c_key, c_v) = (cookie.name().to_owned(), cookie.value().to_owned());

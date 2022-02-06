@@ -16,6 +16,7 @@
 
 use axum::{http::StatusCode, response::Html};
 use cookie::SameSite;
+use serde::Deserialize;
 use sha2::{Digest, Sha256};
 use skytable::{pool::AsyncPool, Query};
 use time::{Duration, OffsetDateTime};
@@ -23,6 +24,9 @@ use tower_cookies::Cookie;
 
 const CREATE_JOTSY_TABLE_AUTH: &str = "create table default:jotsyauth keymap(binstr,binstr)";
 const CREATE_JOTSY_TABLE_NOTES: &str = "create table default:jotsynotes keymap(str,list<str>)";
+
+#[derive(Deserialize)]
+pub struct Empty {}
 
 pub fn query(q: &str) -> Query {
     let q: Vec<&str> = q.split_ascii_whitespace().collect();
