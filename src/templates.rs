@@ -17,7 +17,7 @@
 use crate::handlers::app::Note;
 use crate::util;
 use askama::Template;
-use axum::http::StatusCode;
+use axum::{body, http::StatusCode, response::Response};
 
 #[derive(Template)]
 #[template(path = "login.html")]
@@ -53,7 +53,13 @@ impl NoticePage {
     pub fn e500() -> String {
         Self::new("An internal server error occurred", true)
     }
-    pub fn re500() -> crate::RespTuple {
+    pub fn e500_resp() -> Response {
+        Response::builder()
+            .status(StatusCode::INTERNAL_SERVER_ERROR)
+            .body(body::boxed(body::Full::from(NoticePage::e500())))
+            .unwrap()
+    }
+    pub fn re500() -> crate::JotsyResponse {
         util::resp(StatusCode::INTERNAL_SERVER_ERROR, Self::e500())
     }
     pub fn empty() -> String {

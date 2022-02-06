@@ -15,6 +15,7 @@
 */
 
 use crate::{
+    error::ResponseError,
     templates::{NoticePage, SignupPage},
     util::{self, resp},
 };
@@ -24,7 +25,10 @@ use axum::{
     response::Html,
 };
 use serde::Deserialize;
-use skytable::{actions::AsyncActions, ddl::AsyncDdl, pool::AsyncPool, query, Element, RespCode};
+use skytable::{
+    actions::AsyncActions, ddl::AsyncDdl, error::SkyhashError, pool::AsyncPool, query, Element,
+    RespCode,
+};
 use tower_cookies::Cookies;
 
 #[derive(Deserialize)]
@@ -42,7 +46,7 @@ pub async fn signup(
     Form(data): Form<SignupForm>,
     mut cookies: Cookies,
     Extension(db): Extension<AsyncPool>,
-) -> crate::RespTuple {
+) -> crate::JotsyResponse {
     /*
     Signup flow:
     1. Hash the password (TODO: report error if vpassword != password)
@@ -78,29 +82,24 @@ pub async fn signup(
         );
     }
     let hash = util::bcrypt_hash(&data.password);
-    let mut con = match db.get().await {
-        Ok(c) => c,
-        Err(e) => {
-            log::error!("Failed to get connection from pool: {e}");
-            return NoticePage::re500();
-        }
-    };
-    con.switch(crate::TABLE_AUTH).await.unwrap();
+    let mut con = db.get().await?;
+    con.switch(crate::TABLE_AUTH).await?;
     match con.set(data.username.clone(), hash).await {
         Ok(created_new) if created_new => {
             // cool, we did well
             log::info!("New user `{uname}` created.", uname = data.username);
             let ret =
-                super::login::authenticate(data.username.clone(), &mut cookies, &mut con).await;
-            con.switch(crate::TABLE_NOTES).await.unwrap();
+                super::login::authenticate(data.username.clone(), &mut cookies, &mut con).await?;
+            con.switch(crate::TABLE_NOTES).await?;
             // attempt to create an empty list
             let query = query!("LSET", data.username);
-            if let Ok(Element::RespCode(RespCode::Okay | RespCode::OverwriteError)) =
-                con.run_simple_query(&query).await
-            {
-                ret
+            let create_empty_result = con.run_simple_query(&query).await?;
+            if let Element::RespCode(RespCode::Okay) = create_empty_result {
+                Ok(ret)
             } else {
-                NoticePage::re500()
+                Err(ResponseError::DatabaseError(
+                    SkyhashError::UnexpectedDataType.into(),
+                ))
             }
         }
         Ok(_) => {
@@ -118,7 +117,7 @@ pub async fn signup(
     }
 }
 
-pub async fn no_signup() -> crate::RespTuple {
+pub async fn no_signup() -> crate::JotsyResponse {
     resp(
         StatusCode::BAD_REQUEST,
         NoticePage::new(

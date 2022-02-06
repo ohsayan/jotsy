@@ -21,62 +21,39 @@ use axum::{
     AddExtensionLayer, Router,
 };
 use skytable::pool;
-use std::{
-    env,
-    net::{IpAddr, Ipv4Addr, SocketAddr},
-};
+use std::{env, net::SocketAddr};
 use tower_cookies::CookieManagerLayer;
 // modules
+mod config;
+mod error;
 mod handlers;
 mod templates;
 mod util;
 
-const JOTSY_BIND_HOST: IpAddr = IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1));
-const JOTSY_BIND_PORT: u16 = 2022;
-const JOTSY_SKY_HOST: &str = "127.0.0.1";
-const JOTSY_SKY_PORT: u16 = 2003;
 const TABLE_AUTH: &str = "default:jotsyauth";
 const TABLE_NOTES: &str = "default:jotsynotes";
-const ENV_SKY_HOST: &str = "JOTSY_SKY_HOST";
-const ENV_SKY_PORT: &str = "JOTSY_SKY_PORT";
-const ENV_JOTSY_HOST: &str = "JOTSY_HOST";
-const ENV_JOTSY_PORT: &str = "JOTSY_PORT";
-const ENV_JOTSY_SIGNUP_ENABLED: &str = "JOTSY_SIGNUP_ENABLED";
 
 type DynResult<T> = Result<T, Box<dyn std::error::Error>>;
-type RespTuple = (StatusCode, Html<String>);
+type JotsyResponseResult<T> = Result<T, error::ResponseError>;
+type JotsyResponse = JotsyResponseResult<(StatusCode, Html<String>)>;
 
 #[tokio::main]
 async fn main() -> DynResult<()> {
-    let sky_host = env::var(ENV_SKY_HOST).unwrap_or(JOTSY_SKY_HOST.to_owned());
-    let sky_port = env::var(ENV_SKY_PORT)
-        .map(|p| p.parse())
-        .unwrap_or(Ok(JOTSY_SKY_PORT))?;
-    let jotsy_host = env::var(ENV_JOTSY_HOST)
-        .map(|v| v.parse())
-        .unwrap_or(Ok(JOTSY_BIND_HOST))?;
-    let jotsy_port = env::var(ENV_JOTSY_PORT)
-        .map(|v| v.parse())
-        .unwrap_or(Ok(JOTSY_BIND_PORT))?;
-    let jotsy_signup_enabled = env::var(ENV_JOTSY_SIGNUP_ENABLED)
-        .map(|v| v.parse())
-        .unwrap_or(Ok(true))?;
+    let cfg = config::Config::init()?;
     // configure our logger
     env_logger::Builder::new()
         .parse_filters(&env::var("JOTSY_LOG").unwrap_or_else(|_| "info".to_owned()))
         .init();
     log::trace!(
         "Establishing connection to Skytable on: {}:{}",
-        sky_host,
-        sky_port
+        cfg.sky_host,
+        cfg.sky_port
     );
     // get our skytable instance
-    let pool = pool::get_async(sky_host, sky_port, 10).await?;
+    let pool = pool::get_async(cfg.sky_host, cfg.sky_port, 10).await?;
     log::trace!("Connected to Skytable pool");
     util::create_tables(&pool).await?;
     log::trace!("Created/reinitialized tables");
-    // this is our host:port
-    let addr = SocketAddr::new(jotsy_host, jotsy_port);
     // create the routes
     let mut router = Router::new()
         // this is our GET for /
@@ -94,7 +71,7 @@ async fn main() -> DynResult<()> {
         .route("/static/js/login.js", get(handlers::assets::index_login_js))
         .route("/static/js/app.js", get(handlers::assets::index_app_js))
         .route("/favicon.ico", get(handlers::assets::favicon));
-    if jotsy_signup_enabled {
+    if cfg.signup_enabled {
         router = router
             .route("/signup", post(handlers::signup))
             .route("/signup", get(handlers::signup_get));
@@ -107,6 +84,7 @@ async fn main() -> DynResult<()> {
         // add the database "layer"
         .layer(AddExtensionLayer::new(pool));
     // now run the service
+    let addr = SocketAddr::new(cfg.host.parse()?, cfg.port);
     log::info!("Running server on http://127.0.0.1:2022/");
     tokio::select! {
         _ = axum::Server::bind(&addr).serve(router.into_make_service()) => {}

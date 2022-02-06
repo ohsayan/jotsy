@@ -1,9 +1,6 @@
 .vscode
 .DS_Store
-
-
-# Added by cargo
-
 /target
 data
 jotsy
+.sky_pid

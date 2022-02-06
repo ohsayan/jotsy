@@ -33,14 +33,8 @@ pub async fn logout(
     Form(_): Form<Empty>,
     cookies: Cookies,
     Extension(db): Extension<AsyncPool>,
-) -> crate::RespTuple {
-    let mut con = match db.get().await {
-        Ok(c) => c,
-        Err(e) => {
-            log::error!("Failed to get connection from pool: {e}");
-            return NoticePage::re500();
-        }
-    };
+) -> crate::JotsyResponse {
+    let mut con = db.get().await?;
     let c_user = cookies.get(super::COOKIE_USERNAME);
     let c_token = cookies.get(super::COOKIE_TOKEN);
     match (c_user, c_token) {

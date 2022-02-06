@@ -17,8 +17,7 @@
 use axum::{http::StatusCode, response::Html};
 use cookie::SameSite;
 use sha2::{Digest, Sha256};
-use skytable::pool::AsyncPool;
-use skytable::Query;
+use skytable::{pool::AsyncPool, Query};
 use time::{Duration, OffsetDateTime};
 use tower_cookies::Cookie;
 
@@ -50,8 +49,8 @@ pub async fn create_tables(pool: &AsyncPool) -> crate::DynResult<()> {
     Ok(())
 }
 
-pub fn resp(code: StatusCode, body: impl ToString) -> (StatusCode, Html<String>) {
-    (code, Html::from(body.to_string()))
+pub fn resp(code: StatusCode, body: impl ToString) -> crate::JotsyResponse {
+    Ok((code, Html::from(body.to_string())))
 }
 
 pub fn create_cookie(name: impl ToString, value: impl ToString) -> Cookie<'static> {

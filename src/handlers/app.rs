@@ -39,17 +39,11 @@ impl Note {
     }
 }
 
-pub async fn app(uname: String, db: AsyncPool) -> crate::RespTuple {
-    let mut con = match db.get().await {
-        Ok(c) => c,
-        Err(e) => {
-            log::error!("Failed to get connection from pool: {e}");
-            return NoticePage::re500();
-        }
-    };
-    con.switch(crate::TABLE_NOTES).await.unwrap();
+pub async fn app(uname: String, db: AsyncPool) -> crate::JotsyResponse {
+    let mut con = db.get().await?;
+    con.switch(crate::TABLE_NOTES).await?;
     let query = query!("LGET", &uname);
-    let ret = con.run_simple_query(&query).await.unwrap();
+    let ret = con.run_simple_query(&query).await?;
     let notes: Vec<Note> = if let Element::Array(Array::Str(e)) = ret {
         e.into_iter()
             .rev()
@@ -77,24 +71,14 @@ pub async fn create_note(
     mut cookies: Cookies,
     Extension(db): Extension<AsyncPool>,
     Form(note): Form<FormNote>,
-) -> crate::RespTuple {
+) -> crate::JotsyResponse {
     let time = Local::now().format("%B %d, %Y | %I:%M %p").to_string();
-    let mut con = match db.get().await {
-        Ok(c) => c,
-        Err(e) => {
-            log::error!("Failed to get connection from pool: {e}");
-            return NoticePage::re500();
-        }
-    };
+    let mut con = db.get().await?;
     // verify the user
-    let ret = super::root::verify_user_or_error(&mut con, &mut cookies).await;
-    let username = match ret {
-        Ok(uname) => uname,
-        Err(e) => return e,
-    };
+    let username = super::root::verify_user_or_error(&mut con, &mut cookies).await?;
     // now create the note
     let note = Note::new(time, note.note);
-    con.switch(crate::TABLE_NOTES).await.unwrap();
+    con.switch(crate::TABLE_NOTES).await?;
     let json = serde_json::to_string(&note).unwrap();
     let query = query!("LMOD", &username, "PUSH", json);
     match con.run_simple_query(&query).await {

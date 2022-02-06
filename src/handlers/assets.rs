@@ -32,11 +32,11 @@ async fn asset(source: &'static [u8], ty: &'static str) -> impl IntoResponse {
 }
 
 async fn css(source: &'static str) -> impl IntoResponse {
-    asset(source.as_bytes(), "text/css").await
+    asset(source.as_bytes(), mime::TEXT_CSS.as_ref()).await
 }
 
 async fn js(source: &'static str) -> impl IntoResponse {
-    asset(source.as_bytes(), "text/javascript").await
+    asset(source.as_bytes(), mime::TEXT_JAVASCRIPT.as_ref()).await
 }
 
 pub async fn index_login_css() -> impl IntoResponse {

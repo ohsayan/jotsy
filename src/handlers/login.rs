@@ -50,14 +50,14 @@ pub(super) async fn authenticate(
     uname: String,
     cookies: &mut Cookies,
     con: &mut Connection,
-) -> crate::RespTuple {
+) -> crate::JotsyResponse {
     // sweet, we're verified
     // generate a token
     let token = generate_token();
     // hash the token
     let token_hash = util::sha2(&token);
     // store the hash in the DB
-    con.set(token_hash, &uname).await.unwrap();
+    con.set(token_hash, &uname).await?;
     // now set cookies
     cookies.add(create_cookie(COOKIE_USERNAME, &uname));
     cookies.add(create_cookie(COOKIE_TOKEN, token));
@@ -71,7 +71,7 @@ pub async fn login(
     mut cookies: Cookies,
     Extension(db): Extension<AsyncPool>,
     Form(lgn): Form<Login>,
-) -> crate::RespTuple {
+) -> crate::JotsyResponse {
     /*
     Login flow:
     1. Get the hashed password from the DB
@@ -81,14 +81,8 @@ pub async fn login(
         b. Send token to browser
     4. If not verified, return to `/`
     */
-    let mut con = match db.get().await {
-        Ok(c) => c,
-        Err(e) => {
-            log::error!("Failed to get connection from pool: {e}");
-            return NoticePage::re500();
-        }
-    };
-    con.switch(crate::TABLE_AUTH).await.unwrap();
+    let mut con = db.get().await?;
+    con.switch(crate::TABLE_AUTH).await?;
     let hash_from_db: Result<String, Error> = con.get(&lgn.username).await;
     match hash_from_db {
         Ok(v) if util::bcrypt_verify(&lgn.password, &v) => {
