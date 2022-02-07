@@ -16,7 +16,7 @@
 
 use crate::{
     templates::{App, NoticePage, SingleNote},
-    util::resp,
+    util::{self, resp},
 };
 use axum::{
     extract::{Extension, Form},
@@ -52,7 +52,7 @@ pub async fn app(uname: String, db: AsyncPool) -> crate::JotsyResponse {
             .filter_map(|v| {
                 v.map(|v| {
                     let mut note: Note = serde_json::from_str(&v).unwrap();
-                    note.body = markdown::to_html(&note.body);
+                    note.body = util::md_to_html(&note.body);
                     note
                 })
             })

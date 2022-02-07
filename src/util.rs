@@ -15,6 +15,7 @@
 */
 
 use axum::{http::StatusCode, response::Html};
+use comrak::{markdown_to_html as to_html, ComrakOptions};
 use cookie::SameSite;
 use serde::Deserialize;
 use sha2::{Digest, Sha256};
@@ -51,6 +52,21 @@ pub async fn create_tables(pool: &AsyncPool) -> crate::DynResult<()> {
     check_error(r1);
     check_error(r2);
     Ok(())
+}
+
+pub fn md_to_html(md: &str) -> String {
+    let mut options = ComrakOptions::default();
+    options.extension.strikethrough = true;
+    options.extension.tagfilter = true;
+    options.extension.table = true;
+    options.extension.autolink = true;
+    options.extension.tasklist = true;
+    options.extension.superscript = true;
+    options.extension.footnotes = true;
+    options.extension.description_lists = true;
+    // this is fine because we escape tags anyways
+    options.render.unsafe_ = true;
+    to_html(md, &options)
 }
 
 pub fn resp(code: StatusCode, body: impl ToString) -> crate::JotsyResponse {

@@ -95,7 +95,7 @@ pub struct SingleNote {
 impl SingleNote {
     pub fn new(mut note: Note) -> String {
         // update markdown
-        note.body = markdown::to_html(&note.body);
+        note.body = util::md_to_html(&note.body);
         Self { note }.render().unwrap()
     }
 }
