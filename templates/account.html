@@ -13,7 +13,10 @@
   </head>
   <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav
+      class="navbar navbar-expand-lg navbar-dark"
+      style="background-color: #0000aa"
+    >
       <div class="container-fluid">
         <a class="navbar-brand" href="/">Jotsy</a>
         <button
@@ -57,6 +60,18 @@
             <br />
             Your username is <b>@{{ username }}</b>. You have
             <b>{{ count }} note(s)</b> stored on Jotsy.
+          </p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-body">
+          <div class="card-header">
+            <h1 class="text-danger">Danger zone</h1>
+          </div>
+          <p class="p-3 card-text lead">
+            This section provides you with options to perform irreversible
+            actions to your account including deleting all your notes or
+            deleting your account altogether.
           </p>
           <a href="/delete/account"
             ><button class="btn btn-danger">Delete my account</button></a

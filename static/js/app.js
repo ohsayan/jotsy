@@ -6,6 +6,12 @@ const noteCount = document.getElementById("count");
 var lastNote = notesBody.getElementsByClassName("isnote")[0];
 const loader = document.getElementById("loader");
 
+document.onkeyup = function (e) {
+  if (e.ctrlKey && e.key === "Enter" && document.activeElement === notesData) {
+    submitAndUpdate();
+  }
+};
+
 function send(data) {
   const XHR = new XMLHttpRequest();
   var encodedData = "",
@@ -56,4 +62,5 @@ function submitAndUpdate() {
     loader.hidden = false;
     send({ note: note });
   }
+  notesData.focus();
 }

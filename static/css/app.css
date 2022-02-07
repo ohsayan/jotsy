@@ -1,11 +1,11 @@
 .loader {
-  border: 6px solid #f3f3f3;
+  border: 5px solid #f3f3f3;
   border-radius: 50%;
-  border-top: 6px solid #000062;
+  border-top: 5px solid #0000aa;
   width: 24px;
   height: 24px;
-  -webkit-animation: spin 2s linear infinite; /* Safari */
-  animation: spin 2s linear infinite;
+  -webkit-animation: spin 1s linear infinite; /* Safari */
+  animation: spin 1s linear infinite;
 }
 
 /* Safari */
