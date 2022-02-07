@@ -56,9 +56,14 @@
         <p class="lead text-danger">
           You will permanently lose access to {{ lose }}.
         </p>
-        <button type="submit" class="w-20 btn btn-lg btn-danger">
-          Delete {{ what }}
-        </button>
+        <div class="row m-1">
+          <a href="/" class="btn btn-lg btn-primary">Cancel operation</a>
+        </div>
+        <div class="row m-1">
+          <button type="submit" class="w-20 btn btn-lg btn-danger">
+            Delete {{ what }}
+          </button>
+        </div>
       </form>
     </main>
   </body>
