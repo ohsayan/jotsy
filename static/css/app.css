@@ -60,3 +60,21 @@ pre code {
     font-size: 1.1em;
   }
 }
+
+.textarea {
+  border: 1px solid #ccc;
+  font-family: inherit;
+  font-size: inherit;
+  padding: 10px 6px;
+  font-size: 1em;
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  resize: vertical;
+  min-height: 30px;
+  line-height: 20px;
+}
+.textarea[contenteditable]:empty::before {
+  content: "How have things been? Start jotsying your notes here ...";
+  color: gray;
+}

@@ -41,7 +41,7 @@ function send(data) {
         var n = parseInt(noteCount.textContent);
         n += 1;
         noteCount.textContent = n.toString();
-        notesData.value = "";
+        notesData.innerText = "";
       } else {
         noteError.hidden = false;
         loader.hidden = true;
@@ -52,7 +52,7 @@ function send(data) {
 }
 
 function submitAndUpdate() {
-  var note = notesData.value;
+  var note = notesData.innerText;
   if (note.length === 0) {
     noteError.hidden = false;
     noteErrorMessage.innerText = "Note cannot be empty!";
