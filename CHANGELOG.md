@@ -10,6 +10,7 @@ All changes to this project will be noted in this file.
 - Account settings
   - Delete all notes (`/delete/notes`)
   - Delete account (`/delete/account`)
+- Added `dev/prod` mode
 
 ### Fixes
 

@@ -40,6 +40,7 @@ type JotsyResponse = JotsyResponseResult<(StatusCode, Html<String>)>;
 #[tokio::main]
 async fn main() -> DynResult<()> {
     let cfg = config::Config::init()?;
+    util::set_prod_mode(cfg.is_prod);
     // configure our logger
     env_logger::Builder::new()
         .parse_filters(&env::var("JOTSY_LOG").unwrap_or_else(|_| "info".to_owned()))

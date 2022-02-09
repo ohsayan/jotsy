@@ -28,6 +28,8 @@ pub struct Config {
     pub port: u16,
     #[envconfig(from = "JOTSY_SIGNUP_ENABLED", default = "true")]
     pub signup_enabled: bool,
+    #[envconfig(from = "JOTSY_DEPLOY_PROD", default = "true")]
+    pub is_prod: bool,
 }
 
 impl Config {

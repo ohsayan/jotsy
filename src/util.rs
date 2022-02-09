@@ -17,6 +17,7 @@
 use axum::{http::StatusCode, response::Html};
 use comrak::{markdown_to_html as to_html, ComrakOptions};
 use cookie::SameSite;
+use core::sync::atomic::{AtomicBool, Ordering};
 use serde::Deserialize;
 use sha2::{Digest, Sha256};
 use skytable::{pool::AsyncPool, Query};
@@ -25,6 +26,16 @@ use tower_cookies::Cookie;
 
 const CREATE_JOTSY_TABLE_AUTH: &str = "create table default:jotsyauth keymap(binstr,binstr)";
 const CREATE_JOTSY_TABLE_NOTES: &str = "create table default:jotsynotes keymap(str,list<str>)";
+static JOTSY_PROD: AtomicBool = AtomicBool::new(true);
+const ORD_RELAXED: Ordering = Ordering::Relaxed;
+
+pub fn set_prod_mode(is_prod: bool) {
+    self::JOTSY_PROD.store(is_prod, ORD_RELAXED)
+}
+
+pub fn is_prod() -> bool {
+    self::JOTSY_PROD.load(ORD_RELAXED)
+}
 
 #[derive(Deserialize)]
 pub struct Empty {}
@@ -79,7 +90,9 @@ pub fn create_cookie(name: impl ToString, value: impl ToString) -> Cookie<'stati
     now += Duration::days(15);
     c.set_expires(now);
     c.set_same_site(SameSite::Strict);
-    c.set_secure(true);
+    if self::is_prod() {
+        c.set_secure(true);
+    }
     c.set_http_only(true);
     c.set_path("/");
     c

@@ -28,6 +28,8 @@ Jotsy is a self-hosted, free and open-source note taking app with a goal of simp
    ```
 3. Open your browser and head to http://localhost:2022
 
+If you're having issues, consider reading the [configuration guide](./CONFIG.md).
+
 ## Updating to the latest release
 
 To update to the latest release (don't worry, you won't lose any data), run this:
