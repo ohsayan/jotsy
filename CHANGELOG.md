@@ -16,6 +16,7 @@ All changes to this project will be noted in this file.
 
 - Fix incorrect HTML generation from Markdown
 - Fix cookie removal issues
+- Use `SameSite=Lax` to avoid getting logged out when accessing from other sites
 
 ### Breaking
 

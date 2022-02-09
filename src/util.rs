@@ -89,7 +89,7 @@ pub fn create_cookie(name: impl ToString, value: impl ToString) -> Cookie<'stati
     let mut now = OffsetDateTime::now_utc();
     now += Duration::days(15);
     c.set_expires(now);
-    c.set_same_site(SameSite::Strict);
+    c.set_same_site(SameSite::Lax);
     if self::is_prod() {
         c.set_secure(true);
     }
