@@ -75,8 +75,7 @@ pub fn resp(code: StatusCode, body: impl ToString) -> crate::JotsyResponse {
 
 pub fn create_cookie(name: impl ToString, value: impl ToString) -> Cookie<'static> {
     let mut c = Cookie::new(name.to_string(), value.to_string());
-    #[allow(deprecated)] // this is because of the tower-cookies crate
-    let mut now = OffsetDateTime::now();
+    let mut now = OffsetDateTime::now_utc();
     now += Duration::days(15);
     c.set_expires(now);
     c.set_same_site(SameSite::Strict);
