@@ -106,6 +106,7 @@ pub struct App {
     username: String,
     count: usize,
     notes: Vec<Note>,
+    pages: usize,
 }
 
 impl App {
@@ -113,6 +114,7 @@ impl App {
         Self {
             username,
             count: notes.len(),
+            pages: (notes.len() as f32 / 10_f32).ceil() as usize,
             notes,
         }
         .render()

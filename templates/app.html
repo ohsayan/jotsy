@@ -54,6 +54,29 @@
           <p class="text-primary fs-4">
             You've got <span id="count">{{ count }}</span> note(s) on Jotsy.
           </p>
+          {% if pages > 1 %}
+          <nav aria-label="List of pages with notes">
+            <ul class="pagination">
+              <li class="page-item">
+                <a class="page-link" href="#" onclick="loadPagePrev()"
+                  >Back</a
+                >
+              </li>
+              {% for i in 1..pages+1 %} {% if i == 1 %}
+              <li class="page-item active" onclick="loadPage(this)">
+                <button class="page-link">{{ i }}</button>
+              </li>
+              {% else %}
+              <li class="page-item" onclick="loadPage(this)">
+                <button class="page-link">{{ i }}</button>
+              </li>
+              {% endif %} {% endfor %}
+              <li class="page-item">
+                <a class="page-link" href="#" onclick="loadPageNext()">Next</a>
+              </li>
+              {% endif %}
+            </ul>
+          </nav>
         </div>
         <div class="col-md-9">
           <div class="border border-primary p-2 rounded border-2 my-2">
