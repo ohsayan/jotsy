@@ -50,6 +50,9 @@ async fn main() -> DynResult<()> {
         cfg.sky_host,
         cfg.sky_port
     );
+    if !cfg.is_prod {
+        log::warn!("You're running a development version of Jotsy");
+    }
     // get our skytable instance
     let pool = pool::get_async(cfg.sky_host, cfg.sky_port, 10).await?;
     // just attempt to get a connection
