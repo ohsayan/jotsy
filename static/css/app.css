@@ -78,3 +78,7 @@ pre code {
   content: "How have things been? Start jotsying your notes here ...";
   color: gray;
 }
+
+img {
+  width: 100%;
+}
