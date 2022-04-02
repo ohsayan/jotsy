@@ -64,26 +64,26 @@ pub async fn signup(
     if data.username.len() < 6 {
         return resp(
             StatusCode::UNPROCESSABLE_ENTITY,
-            SignupPage::new("Username must have atleast 6 letters"),
+            SignupPage::render_new("Username must have atleast 6 letters"),
         );
     }
     if data.username.chars().any(|ch| !ch.is_ascii_alphanumeric()) {
         // some funky chars in the username; let's prevent that
         return resp(
             StatusCode::UNPROCESSABLE_ENTITY,
-            SignupPage::new("Username can only have alphanumeric characters"),
+            SignupPage::render_new("Username can only have alphanumeric characters"),
         );
     }
     if data.password != data.vpassword {
         return resp(
             StatusCode::UNPROCESSABLE_ENTITY,
-            SignupPage::new("The passwords do not match"),
+            SignupPage::render_new("The passwords do not match"),
         );
     }
     if data.password.len() < 8 {
         return resp(
             StatusCode::UNPROCESSABLE_ENTITY,
-            SignupPage::new("Passwords must have atleast 8 characters"),
+            SignupPage::render_new("Passwords must have atleast 8 characters"),
         );
     }
     let hash = util::bcrypt_hash(&data.password);
@@ -111,7 +111,7 @@ pub async fn signup(
             // nope, username is taken
             resp(
                 StatusCode::CONFLICT,
-                SignupPage::new("Sorry, that username is taken"),
+                SignupPage::render_new("Sorry, that username is taken"),
             )
         }
         Err(e) => {
@@ -126,7 +126,7 @@ pub async fn signup(
 pub async fn no_signup() -> crate::JotsyResponse {
     resp(
         StatusCode::BAD_REQUEST,
-        NoticePage::new(
+        NoticePage::render_new(
             "Signups are currently disabled on this Jotsy instance",
             false,
         ),

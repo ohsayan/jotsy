@@ -18,7 +18,7 @@ use axum::{
     http::StatusCode,
     response::Html,
     routing::{get, post},
-    AddExtensionLayer, Router,
+    Extension, Router,
 };
 use skytable::pool;
 use std::{env, net::SocketAddr};
@@ -93,7 +93,7 @@ async fn main() -> DynResult<()> {
         // add a cookie "layer" (axum's way of customizing routing)
         .layer(CookieManagerLayer::new())
         // add the database "layer"
-        .layer(AddExtensionLayer::new(pool));
+        .layer(Extension(pool));
     // now run the service
     let addr = SocketAddr::new(cfg.host.parse()?, cfg.port);
     log::info!("Running server on http://127.0.0.1:2022/");

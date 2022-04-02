@@ -51,7 +51,7 @@ pub async fn account(
             ))
         }
     };
-    resp(StatusCode::OK, Account::new(count, username))
+    resp(StatusCode::OK, Account::render_new(count, username))
 }
 
 /// Response for a delete request. Returns a [`DeleteUI`]
@@ -64,7 +64,7 @@ async fn delete(
 ) -> crate::JotsyResponse {
     let mut con = db.get().await?;
     let un = super::root::verify_user_or_error(&mut con, &mut cookies).await?;
-    resp(StatusCode::OK, DeleteUI::new(what, path, un, lose))
+    resp(StatusCode::OK, DeleteUI::render_new(what, path, un, lose))
 }
 
 /// `GET` for `/delete/account`
@@ -112,7 +112,7 @@ async fn delete_verify(
     match hash_from_db {
         Ok(v) if util::bcrypt_verify(&form.password, &v) => Ok(username),
         Err(Error::SkyError(SkyhashError::Code(RespCode::NotFound))) | Ok(_) => {
-            Err(ResponseError::Redirect(NoticePage::new(
+            Err(ResponseError::Redirect(NoticePage::render_new(
                 "Failed to verify details for privileged action",
                 true,
             )))

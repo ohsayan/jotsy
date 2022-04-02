@@ -61,7 +61,7 @@ pub async fn app(uname: String, db: AsyncPool) -> crate::JotsyResponse {
         log::error!("Failed to LGET notes");
         return NoticePage::re500();
     };
-    resp(StatusCode::OK, App::new(uname, notes))
+    resp(StatusCode::OK, App::render_new(uname, notes))
 }
 
 #[derive(Deserialize)]
@@ -91,7 +91,9 @@ pub async fn create_note(
     let json = serde_json::to_string(&note).unwrap();
     let query = query!("LMOD", &username, "PUSH", json);
     match con.run_simple_query(&query).await {
-        Ok(Element::RespCode(RespCode::Okay)) => resp(StatusCode::CREATED, SingleNote::new(note)),
+        Ok(Element::RespCode(RespCode::Okay)) => {
+            resp(StatusCode::CREATED, SingleNote::render_new(note))
+        }
         Ok(_) => NoticePage::re500(),
         Err(e) => {
             log::error!("Error while creating note: {e}");

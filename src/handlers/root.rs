@@ -65,7 +65,6 @@ pub(super) async fn verify_user_or_error(
         (Some(uname), Some(token)) => {
             let (uname_v, token_v) = (uname.value().to_owned(), token.value().to_owned());
             let verified = verify_user(con, &uname_v, &token_v).await?;
-            drop(con); // return con to the pool; also helps borrowck
             if verified {
                 Ok(uname.value().to_string())
             } else {
@@ -78,7 +77,7 @@ pub(super) async fn verify_user_or_error(
                 )))
             }
         }
-        _ => Err(ResponseError::Redirect(LoginPage::new(false))),
+        _ => Err(ResponseError::Redirect(LoginPage::render_new(false))),
     }
 }
 

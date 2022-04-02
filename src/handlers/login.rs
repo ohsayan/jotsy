@@ -47,7 +47,7 @@ pub struct Login {
 /// If any cookies are set, it will reload `/` to trigger authentication, else it will
 /// return the login page
 pub async fn login_get(cookies: Cookies) -> Html<String> {
-    super::redirect_home_if_cookie_set(cookies, LoginPage::new(false)).await
+    super::redirect_home_if_cookie_set(cookies, LoginPage::render_new(false)).await
 }
 
 /// Authenticate an user. **You must ensure that the user is verified before authenticating
@@ -106,10 +106,10 @@ pub async fn login(
         }
         Ok(_) => {
             // nope, unverified
-            resp(StatusCode::UNAUTHORIZED, LoginPage::new(true))
+            resp(StatusCode::UNAUTHORIZED, LoginPage::render_new(true))
         }
         Err(Error::SkyError(SkyhashError::Code(RespCode::NotFound))) => {
-            resp(StatusCode::NOT_FOUND, LoginPage::new(true))
+            resp(StatusCode::NOT_FOUND, LoginPage::render_new(true))
         }
         Err(e) => {
             log::error!("Failed to log user in: {}", e);

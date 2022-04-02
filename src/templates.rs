@@ -26,7 +26,7 @@ pub struct LoginPage {
 }
 
 impl LoginPage {
-    pub fn new(login_failed: bool) -> String {
+    pub fn render_new(login_failed: bool) -> String {
         Self { login_failed }.render().unwrap()
     }
 }
@@ -39,7 +39,7 @@ pub struct NoticePage {
 }
 
 impl NoticePage {
-    pub fn new(message: impl ToString, redirect: bool) -> String {
+    pub fn render_new(message: impl ToString, redirect: bool) -> String {
         NoticePage {
             message: message.to_string(),
             redirect,
@@ -48,10 +48,10 @@ impl NoticePage {
         .unwrap()
     }
     pub fn new_redirect(message: impl ToString) -> String {
-        Self::new(message, true)
+        Self::render_new(message, true)
     }
     pub fn e500() -> String {
-        Self::new("An internal server error occurred", false)
+        Self::render_new("An internal server error occurred", false)
     }
     pub fn e500_resp() -> Response {
         Response::builder()
@@ -63,7 +63,7 @@ impl NoticePage {
         util::resp(StatusCode::INTERNAL_SERVER_ERROR, Self::e500())
     }
     pub fn empty() -> String {
-        Self::new("", true)
+        Self::render_new("", true)
     }
 }
 
@@ -74,7 +74,7 @@ pub struct SignupPage {
 }
 
 impl SignupPage {
-    pub fn new(message: &'static str) -> String {
+    pub fn render_new(message: &'static str) -> String {
         Self {
             error: Some(message),
         }
@@ -93,7 +93,7 @@ pub struct SingleNote {
 }
 
 impl SingleNote {
-    pub fn new(mut note: Note) -> String {
+    pub fn render_new(mut note: Note) -> String {
         // update markdown
         note.body = util::md_to_html(&note.body);
         Self { note }.render().unwrap()
@@ -109,7 +109,7 @@ pub struct App {
 }
 
 impl App {
-    pub fn new(username: String, notes: Vec<Note>) -> String {
+    pub fn render_new(username: String, notes: Vec<Note>) -> String {
         Self {
             username,
             count: notes.len(),
@@ -128,7 +128,7 @@ pub struct Account {
 }
 
 impl Account {
-    pub fn new(count: u64, username: String) -> String {
+    pub fn render_new(count: u64, username: String) -> String {
         Self { count, username }.render().unwrap()
     }
 }
@@ -143,7 +143,7 @@ pub struct DeleteUI {
 }
 
 impl DeleteUI {
-    pub fn new(
+    pub fn render_new(
         what: impl ToString,
         action: impl ToString,
         username: impl ToString,
