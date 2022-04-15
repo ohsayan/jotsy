@@ -98,8 +98,7 @@ pub async fn signup(
             con.switch(crate::TABLE_NOTES).await?;
             // attempt to create an empty list
             let query = query!("LSET", data.username);
-            let create_empty_result = con.run_simple_query(&query).await?;
-            if let Element::RespCode(RespCode::Okay) = create_empty_result {
+            if let Element::RespCode(RespCode::Okay) = con.run_query(&query).await? {
                 Ok(ret)
             } else {
                 Err(ResponseError::DatabaseError(

@@ -16,9 +16,7 @@ tokio = { version = "1.17.0", features = [
     "rt-multi-thread",
     "signal",
 ] }
-skytable = { version = "0.7.0-alpha.4", features = [
-    "aio",
-], default-features = false }
+skytable = { version = "0.7.0", features = ["aio"], default-features = false }
 # http
 cookie = "0.16.0"
 tower-cookies = "0.6.0"

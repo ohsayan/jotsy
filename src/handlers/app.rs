@@ -24,7 +24,7 @@ use axum::{
 };
 use chrono::prelude::Local;
 use serde::{Deserialize, Serialize};
-use skytable::{ddl::AsyncDdl, pool::AsyncPool, query, types::Array, Element, RespCode};
+use skytable::{ddl::AsyncDdl, pool::AsyncPool, query, Element, RespCode};
 use tower_cookies::Cookies;
 
 #[derive(Serialize, Deserialize)]
@@ -35,6 +35,10 @@ pub struct Note {
 }
 
 impl Note {
+    fn new_from_json<T: AsRef<str>>(json: T) -> Self {
+        let data: Note = serde_json::from_str(json.as_ref()).unwrap();
+        Self::new(data.date, util::md_to_html(&data.body))
+    }
     fn new(date: String, body: String) -> Self {
         Self { date, body }
     }
@@ -45,22 +49,8 @@ pub async fn app(uname: String, db: AsyncPool) -> crate::JotsyResponse {
     let mut con = db.get().await?;
     con.switch(crate::TABLE_NOTES).await?;
     let query = query!("LGET", &uname);
-    let ret = con.run_simple_query(&query).await?;
-    let notes: Vec<Note> = if let Element::Array(Array::Str(e)) = ret {
-        e.into_iter()
-            .rev()
-            .filter_map(|v| {
-                v.map(|v| {
-                    let mut note: Note = serde_json::from_str(&v).unwrap();
-                    note.body = util::md_to_html(&note.body);
-                    note
-                })
-            })
-            .collect()
-    } else {
-        log::error!("Failed to LGET notes");
-        return NoticePage::re500();
-    };
+    let notes: Vec<String> = con.run_query(&query).await?;
+    let notes: Vec<Note> = notes.iter().map(Note::new_from_json).collect();
     resp(StatusCode::OK, App::render_new(uname, notes))
 }
 
@@ -90,7 +80,7 @@ pub async fn create_note(
     con.switch(crate::TABLE_NOTES).await?;
     let json = serde_json::to_string(&note).unwrap();
     let query = query!("LMOD", &username, "PUSH", json);
-    match con.run_simple_query(&query).await {
+    match con.run_query(&query).await {
         Ok(Element::RespCode(RespCode::Okay)) => {
             resp(StatusCode::CREATED, SingleNote::render_new(note))
         }

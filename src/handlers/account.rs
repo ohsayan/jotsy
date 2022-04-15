@@ -43,14 +43,7 @@ pub async fn account(
     let username = super::root::verify_user_or_error(&mut con, &mut cookies).await?;
     con.switch(crate::TABLE_NOTES).await?;
     let q = query!("LGET", &username, "len");
-    let count = match con.run_simple_query(&q).await? {
-        Element::UnsignedInt(uint) => uint,
-        _ => {
-            return Err(ResponseError::DatabaseError(
-                SkyhashError::UnexpectedDataType.into(),
-            ))
-        }
-    };
+    let count: u64 = con.run_query(&q).await?;
     resp(StatusCode::OK, Account::render_new(count, username))
 }
 
@@ -164,9 +157,8 @@ pub async fn del_notes_post(
     let mut con = db.get().await?;
     let username = self::delete_verify(&mut cookies, &mut con, form).await?;
     con.switch(crate::TABLE_NOTES).await?;
-    if let Element::RespCode(RespCode::Okay) = con
-        .run_simple_query(&query!("LMOD", username, "clear"))
-        .await?
+    if let Element::RespCode(RespCode::Okay) =
+        con.run_query(&query!("LMOD", username, "clear")).await?
     {
         resp(
             StatusCode::OK,

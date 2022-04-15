@@ -49,12 +49,8 @@ use skytable::{error::errorstring::ERR_ALREADY_EXISTS, Element, RespCode};
 
 pub async fn create_tables(pool: &AsyncPool) -> crate::DynResult<()> {
     let mut con = pool.get().await?;
-    let r1 = con
-        .run_simple_query(&query(CREATE_JOTSY_TABLE_AUTH))
-        .await?;
-    let r2 = con
-        .run_simple_query(&query(CREATE_JOTSY_TABLE_NOTES))
-        .await?;
+    let r1 = con.run_query(&query(CREATE_JOTSY_TABLE_AUTH)).await?;
+    let r2 = con.run_query(&query(CREATE_JOTSY_TABLE_NOTES)).await?;
     let check_error = |e| match e {
         Element::RespCode(RespCode::Okay) => {}
         Element::RespCode(RespCode::ErrorString(s)) if s.eq(ERR_ALREADY_EXISTS) => {}
