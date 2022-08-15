@@ -10,8 +10,8 @@ readme = "README.md"
 
 [dependencies]
 # networking
-axum = { version = "0.5.6", features = ["headers"] }
-tokio = { version = "1.18.2", features = [
+axum = { version = "0.5.15", features = ["headers"] }
+tokio = { version = "1.20.1", features = [
     "macros",
     "rt-multi-thread",
     "signal",
@@ -19,20 +19,20 @@ tokio = { version = "1.18.2", features = [
 skytable = { version = "0.7.1", features = ["aio"], default-features = false }
 # http
 cookie = "0.16.0"
-tower-cookies = "0.6.0"
+tower-cookies = "0.7.0"
 mime = "0.3.16"
 # templating and ser/de
-comrak = "0.12.1"
+comrak = "0.14.0"
 askama = { version = "0.11.1" }
-serde = { version = "1.0.137", features = ["derive"] }
-serde_json = "1.0.81"
+serde = { version = "1.0.143", features = ["derive"] }
+serde_json = "1.0.83"
 # tokens and auth
 bcrypt = "0.13.0"
 sha2 = "0.10.2"
 rand = "0.8.5"
 # utility
-time = "0.3.9"
+time = "0.3.13"
 env_logger = "0.9.0"
 log = "0.4.17"
-chrono = "0.4.19"
+chrono = "0.4.22"
 envconfig = "0.10.0"
