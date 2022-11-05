@@ -1,7 +1,7 @@
 version: "3.9"
 services:
   skydb:
-    image: skytable/sdb:latest
+    image: skytable/sdb:v0.7.6
     ports:
       - "127.0.0.1:2003:2003"
     volumes:
