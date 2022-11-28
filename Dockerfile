@@ -1,4 +1,4 @@
-FROM debian
+FROM ubuntu:jammy
 COPY target/release/jotsy /usr/local/bin
 RUN mkdir -p /var/lib/jotsy
 WORKDIR /var/lib/jotsy

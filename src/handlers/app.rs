@@ -50,7 +50,7 @@ pub async fn app(uname: String, db: AsyncPool) -> crate::JotsyResponse {
     con.switch(crate::TABLE_NOTES).await?;
     let query = query!("LGET", &uname);
     let notes: Vec<String> = con.run_query(&query).await?;
-    let notes: Vec<Note> = notes.iter().map(Note::new_from_json).collect();
+    let notes: Vec<Note> = notes.iter().rev().map(Note::new_from_json).collect();
     resp(StatusCode::OK, App::render_new(uname, notes))
 }
 
