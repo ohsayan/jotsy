@@ -80,6 +80,12 @@ pub fn resp(code: StatusCode, body: impl ToString) -> crate::JotsyResponse {
     Ok((code, Html::from(body.to_string())))
 }
 
+pub fn null_cookie(cookie_name: &str) -> Cookie<'static> {
+    let mut cookie = Cookie::new(cookie_name.to_owned(), "");
+    cookie.make_removal();
+    cookie
+}
+
 pub fn create_cookie(name: impl ToString, value: impl ToString) -> Cookie<'static> {
     let mut c = Cookie::new(name.to_string(), value.to_string());
     let mut now = OffsetDateTime::now_utc();
@@ -92,14 +98,6 @@ pub fn create_cookie(name: impl ToString, value: impl ToString) -> Cookie<'stati
     c.set_http_only(true);
     c.set_path("/");
     c
-}
-
-pub fn create_remove_cookie(cookie: &Cookie) -> Cookie<'static> {
-    let name = cookie.name();
-    let mut new_cookie =
-        Cookie::parse(format!("{name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT")).unwrap();
-    new_cookie.set_path("/");
-    new_cookie
 }
 
 pub fn bcrypt_hash(input: impl AsRef<[u8]>) -> String {

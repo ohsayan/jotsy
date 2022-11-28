@@ -25,6 +25,8 @@ use axum::{
 use skytable::{actions::AsyncActions, ddl::AsyncDdl, pool::AsyncPool};
 use tower_cookies::Cookies;
 
+use super::{COOKIE_USERNAME, COOKIE_TOKEN};
+
 /// `POST` for `/logout`
 pub async fn logout(
     Form(_): Form<Empty>,
@@ -52,20 +54,20 @@ pub async fn logout_core(
     let c_token = cookies.get(super::COOKIE_TOKEN);
     con.switch(crate::TABLE_AUTH).await?;
     match (c_user, c_token) {
-        (Some(user_c), Some(token_c)) => {
+        (Some(_), Some(token_c)) => {
             let token = token_c.value().to_owned();
             // let's attempt to remove this
             let del = con.del(util::sha2(token)).await?;
             // now remove these cookies
             if del == 1 {
-                cookies.remove(util::create_remove_cookie(&user_c));
-                cookies.remove(util::create_remove_cookie(&token_c));
+                cookies.remove(util::null_cookie(COOKIE_USERNAME));
+                cookies.remove(util::null_cookie(COOKIE_TOKEN));
             }
             resp(StatusCode::OK, NoticePage::new_redirect(redirect_message))
         }
         (Some(cookie), None) | (None, Some(cookie)) => {
             // random cookies, just pop them
-            cookies.remove(util::create_remove_cookie(&cookie));
+            cookies.remove(util::null_cookie(cookie.name()));
             resp(
                 StatusCode::OK,
                 NoticePage::new_redirect("Invalid cookies detected and removed."),
