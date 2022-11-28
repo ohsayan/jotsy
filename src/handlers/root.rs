@@ -14,23 +14,19 @@
  * limitations under the License.
 */
 
-use axum::extract::Extension;
-use tower_cookies::Cookies;
-
-use super::{COOKIE_TOKEN, COOKIE_USERNAME};
-use crate::{
-    error::ResponseError,
-    templates::{LoginPage, NoticePage},
-    util,
-};
-
-use skytable::{
-    actions::AsyncActions,
-    aio::Connection,
-    ddl::AsyncDdl,
-    error::{Error, SkyhashError},
-    pool::AsyncPool,
-    RespCode,
+use {
+    super::{COOKIE_TOKEN, COOKIE_USERNAME},
+    crate::{error::ResponseError, templates::LoginPage, util},
+    axum::extract::Extension,
+    skytable::{
+        actions::AsyncActions,
+        aio::Connection,
+        ddl::AsyncDdl,
+        error::{Error, SkyhashError},
+        pool::AsyncPool,
+        RespCode,
+    },
+    tower_cookies::Cookies,
 };
 
 /// `GET` for `/`
@@ -61,24 +57,15 @@ pub(super) async fn verify_user_or_error(
 ) -> crate::JotsyResponseResult<String> {
     let username = cookies.get(COOKIE_USERNAME);
     let token = cookies.get(COOKIE_TOKEN);
-    match (username, token) {
-        (Some(uname), Some(token)) => {
-            let (uname_v, token_v) = (uname.value().to_owned(), token.value().to_owned());
-            let verified = verify_user(con, &uname_v, &token_v).await?;
-            if verified {
-                Ok(uname.value().to_string())
-            } else {
-                // auth failed, so we should remove these cookies; else we'll keep on
-                // bumping into these
-                cookies.remove(util::create_remove_cookie(&uname));
-                cookies.remove(util::create_remove_cookie(&token));
-                Err(ResponseError::Redirect(NoticePage::new_redirect(
-                    "Found invalid or outdated cookies.",
-                )))
-            }
+    if let (Some(username), Some(token)) = (username, token) {
+        let verified = verify_user(con, username.value(), token.value()).await?;
+        if verified {
+            return Ok(username.value().to_string());
         }
-        _ => Err(ResponseError::Redirect(LoginPage::render_new(false))),
     }
+    cookies.remove(util::null_cookie(COOKIE_USERNAME));
+    cookies.remove(util::null_cookie(COOKIE_TOKEN));
+    Err(ResponseError::Redirect(LoginPage::render_new(false)))
 }
 
 /// Verify the provided token for the username
